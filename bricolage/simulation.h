@@ -11,6 +11,7 @@ private:
 public:
 	Simulation(Board& board);
 	std::list<std::pair<int,int>> run();
+	std::list<Board> run(Board& b, std::list<std::pair<int,int>> path);
 };
 
 

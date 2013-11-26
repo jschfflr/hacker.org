@@ -10,6 +10,10 @@ public:
 
 	State(Board board);
 	void click(Area &a);
+	void click(std::pair<int,int> click);
+
+private:
+	void update();
 };
 
 #endif
