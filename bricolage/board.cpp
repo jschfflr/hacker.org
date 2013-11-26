@@ -7,7 +7,7 @@ Board::Board() {
 	data = "";
 }
 
-Board::Board(int _width, int _height, const char* board) {
+Board::Board(int _width, int _height, std::string board) {
 	this->_width = _width;
 	this->_height = _height;
 	this->data = board;

@@ -19,7 +19,7 @@ private:
 public:
 	Board();
 
-	Board(int width, int height, const char* board);
+	Board(int width, int height, std::string board);
 	char get(int x, int y) const ;
 	void set(int x, int y, char c);
 
