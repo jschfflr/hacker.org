@@ -78,7 +78,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="board.cpp" />
     <ClCompile Include="bricolage.cpp" />
+    <ClCompile Include="simulation.cpp" />
+    <ClCompile Include="state.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="area.h" />
+    <ClInclude Include="board.h" />
+    <ClInclude Include="simulation.h" />
+    <ClInclude Include="state.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
