@@ -3,7 +3,7 @@
 #include <sstream>
 #include <winsock.h>
 
-std::string request(std::string host, std::string url) {
+std::string request(std::string host, std::string url, std::string* session) {
 	struct sockaddr_in server;
 	struct hostent *host_info;
 	int sock;
@@ -33,6 +33,10 @@ std::string request(std::string host, std::string url) {
 	std::stringstream request;
 	request << "GET " << url << " HTTP/1.0\r\n";
 	request << "Host: " << host << "\r\n";
+	
+	if( session )
+		request << "Cookie: " << "PHPSESSID=" << *session << "\r\n";
+		
 	request << "\r\n";
 
 	send(sock, request.str().c_str(), request.str().length(), 0);

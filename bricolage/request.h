@@ -3,6 +3,6 @@
 
 #include <string>
 
-std::string request(std::string host, std::string url);
+std::string request(std::string host, std::string url, std::string* session = 0);
 
 #endif
