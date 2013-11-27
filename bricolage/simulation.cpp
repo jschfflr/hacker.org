@@ -8,7 +8,7 @@ Simulation::Simulation(Board& board) {
 
 std::list<std::pair<int,int>> Simulation::run() {
 	while(!queue.empty()) {
-		State state = (State)queue.front();
+		State state = (State)queue.top();
 		queue.pop();
 
 		auto areas = state.board.areas();

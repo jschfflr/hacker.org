@@ -1,12 +1,12 @@
 #ifndef __SIMULATION_H__
 #define __SIMULATION_H__
 
-#include <queue>
+#include <stack>
 #include "state.h"
 
 class Simulation {
 private:
-	std::queue<State> queue;
+	std::stack<State> queue;
 
 public:
 	Simulation(Board& board);
