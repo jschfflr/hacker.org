@@ -7,7 +7,9 @@ Simulation::Simulation(Board& board) {
 }
 
 std::list<std::pair<int,int>> Simulation::run() {
+	unsigned long long i = 0;
 	while(!queue.empty()) {
+		i++;
 		State state = (State)queue.top();
 		queue.pop();
 
@@ -38,6 +40,7 @@ std::list<std::pair<int,int>> Simulation::run() {
 
 			if( test.board.empty() ) {
 				// SOLUTION
+				std::cout << i << std::endl;
 				return test.clicks;
 			} else {
 				queue.push(test);

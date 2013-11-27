@@ -36,7 +36,9 @@ Level solve(std::string data) {
 	std::regex_search(data, m, r_level);
 	level = atoi( m.str(1).c_str() );
 
-	std::regex_search(data, m, r_vars);
+	if( !std::regex_search(data, m, r_vars) )
+		throw std::runtime_error("Invalid Data.");
+
 	std::string match = m.str(1);
 	
 	std::regex_search(match, m, r_width);
@@ -86,7 +88,7 @@ int main(int argc, char* argv[]) {
 			std::string url = "/brick/index.php?name=hakker1337&password=test1234&path=";
 			url += level.solution;
 			data = request("www.hacker.org", url);
-			std::cout << level.number << "\t" << (std::string)level.board << "\t" << level.solution << std::endl;
+			std::cerr << level.number << "\t" << (std::string)level.board << "\t" << level.solution << std::endl;
 		}
 	} catch(std::exception e) {
 		std::cout << e.what() << std::endl;
