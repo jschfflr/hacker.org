@@ -8,6 +8,7 @@ public:
 	Board board;
 	std::list<std::pair<int,int>> clicks;
 
+	State();
 	State(Board board);
 	void click(Area &a);
 	void click(std::pair<int,int> click);

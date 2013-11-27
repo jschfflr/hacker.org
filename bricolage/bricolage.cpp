@@ -82,10 +82,10 @@ Level solve(std::string data) {
 int main(int argc, char* argv[]) {
 
 	try {
-		std::string data = request("www.hacker.org", "/brick/index.php?name=hakker1337&password=test1234");
+		std::string data = request("www.hacker.org", "/brick/index.php?name=hacker1338&password=test1234");
 		while(true) {
 			Level level = solve(data);
-			std::string url = "/brick/index.php?name=hakker1337&password=test1234&path=";
+			std::string url = "/brick/index.php?name=hacker1338&password=test1234&path=";
 			url += level.solution;
 			data = request("www.hacker.org", url);
 			std::cerr << level.number << "\t" << (std::string)level.board << "\t" << level.solution << std::endl;

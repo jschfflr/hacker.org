@@ -1,5 +1,9 @@
 #include "state.h"
 
+State::State() {
+	this->board = Board();
+}
+
 State::State(Board board) {
 	this->board = board;
 }
