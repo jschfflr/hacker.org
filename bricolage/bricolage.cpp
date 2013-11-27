@@ -83,7 +83,8 @@ Level solve(std::string data) {
 int main(int argc, char* argv[]) {
 
 	try {
-		std::string data = request("www.hacker.org", "/brick/index.php", &session);
+		request("www.hacker.org", "/brick/index.php?name=hakker1337&password=test1234&gotolevel=0");
+		std::string data = request("www.hacker.org", "/brick/index.php?name=hakker1337&password=test1234");
 		while(true) {
 			Level level = solve(data);
 			std::string url = "/brick/index.php?path=";
