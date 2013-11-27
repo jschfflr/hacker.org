@@ -60,6 +60,6 @@ void State::update() {
 				board.set(x, y, '.');
 			}
 		}
-	}while( changes );
+	} while( changes );
 
 }

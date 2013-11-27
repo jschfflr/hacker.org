@@ -27,6 +27,9 @@
     <ClCompile Include="simulation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="request.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="area.h">
@@ -39,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="simulation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="request.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
