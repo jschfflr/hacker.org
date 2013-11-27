@@ -14,13 +14,22 @@ public:
 private:
 	int _width;
 	int _height;
-	std::string data;
+	char* data;
 
 public:
 	Board();
-
+	~Board();
+	Board::Board(const Board& board);
 	Board(int width, int height, std::string board);
-	char get(int x, int y) const ;
+	Board& operator=(const Board& );
+
+	inline char get(int x, int y) const {
+		if( !(0 <= x && x < _width) ||
+			!(0 <= y && y < _height) )
+			throw new std::range_error("Board Index out of Range");
+
+		return data[x + y * _width];	
+	};
 	void set(int x, int y, char c);
 
 	std::string debug();

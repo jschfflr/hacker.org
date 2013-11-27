@@ -4,15 +4,37 @@
 
 Board::Board() {
 	_width = _height = 0;
-	data = "";
+	data = 0;
 }
 
-Board::Board(int _width, int _height, std::string board) {
-	this->_width = _width;
-	this->_height = _height;
-	this->data = board;
+Board::Board(int width, int height, std::string board) {
+	this->_width = width;
+	this->_height = height;
+	this->data = new char[width * height + 1];
+	memcpy(this->data, board.data(), width * height);
+	this->data[width * height] = '\0';
 }
 
+Board::Board(const Board& board) {
+	*this = board;
+}
+
+Board& Board::operator =(const Board& board) {
+	this->_width = board._width;
+	this->_height = board._height;
+	this->data = new char[board._width * board._height + 1];
+	memcpy(this->data, board.data, board._width * board._height);
+	this->data[board._width * board._height] = '\0';
+
+	return *this;
+}
+
+Board::~Board() {
+	if( this->data )
+		delete [] this->data;
+}
+
+/*
 char Board::get(int x, int y) const {
 	if( !(0 <= x && x < _width) ||
 		!(0 <= y && y < _height) )
@@ -20,6 +42,7 @@ char Board::get(int x, int y) const {
 
 	return data[x + y * _width];
 }
+*/
 
 void Board::set(int x, int y, char c) {
 	if( !(0 <= x && x < _width) ||
