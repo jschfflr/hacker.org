@@ -3,15 +3,21 @@
 
 #include <stack>
 #include <mutex>
+#include <thread>
 #include <windows.h>
 #include "state.h"
 
 class Simulation {
 private:
-	std::stack<State> stack;
 	std::mutex stack_lock;
+	std::stack<State> stack;
+	std::list<std::pair<int, int>> path;
+	std::list<std::thread> threads;
+
 	volatile bool running;
-	static DWORD WINAPI thread(void* pContext);
+	static void thread(Simulation* pContext);
+
+	void resolve(std::list<std::pair<int, int>>);
 
 public:
 	Simulation(Board& board);

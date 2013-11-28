@@ -1,4 +1,5 @@
 #include "stats.h"
+#include <Psapi.h>
 
 StatsManager::StatsManager() {
 	thread = CreateThread(NULL, 0, StatsManager::collector, this, 0, NULL);
@@ -23,9 +24,23 @@ DWORD WINAPI StatsManager::collector(void* p) {
 
 	while (true) {
 		self->lock.lock();
-		auto cb = self->vars["stack"];
-		if (cb)
-			std::cout << "--" << cb->get().c_str() << std::endl;
+
+		std::cout << GetTickCount();
+		std::cout << "\t";
+
+		auto var = self->vars["stack"];
+		if (var)
+			std::cout << var->get().c_str();
+		
+		std::cout << "\t";
+		
+		{
+			PROCESS_MEMORY_COUNTERS counters;
+			GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters));
+			std::cout << counters.WorkingSetSize;
+		}
+		
+		std::cout << std::endl;
 		/*
 			//for (auto it = self->vars.begin(); it != self->vars.end(); it++) {
 			std::cout << it->first.c_str();
