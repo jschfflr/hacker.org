@@ -19,13 +19,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -88,6 +88,7 @@
   <ItemGroup>
     <ClCompile Include="board.cpp" />
     <ClCompile Include="bricolage.cpp" />
+    <ClCompile Include="mutex.cpp" />
     <ClCompile Include="object.cpp" />
     <ClCompile Include="simulation.cpp" />
     <ClCompile Include="request.cpp" />
@@ -97,6 +98,7 @@
   <ItemGroup>
     <ClInclude Include="area.h" />
     <ClInclude Include="board.h" />
+    <ClInclude Include="mutex.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="request.h" />
     <ClInclude Include="simulation.h" />

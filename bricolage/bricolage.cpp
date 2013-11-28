@@ -90,10 +90,13 @@ Level solve(std::string data) {
 	}
 }
 
+
+#include "mutex.h"
+
 int main(int argc, char* argv[]) {
 
 	//StatsManager::Get().AddVar("objects", new StaticVariable<std::atomic<long long>>(&count));
-
+	/*
 	_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
 	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDOUT);
@@ -102,7 +105,7 @@ int main(int argc, char* argv[]) {
 	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDOUT);
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
+	*/
 	try {
 		request("www.hacker.org", "/brick/index.php?name=hacker1338&password=test1234&gotolevel=0");
 		std::string data = request("www.hacker.org", "/brick/index.php?name=hacker1338&password=test1234");
@@ -118,7 +121,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	}
 
-	_CrtDumpMemoryLeaks();
+	//_CrtDumpMemoryLeaks();
 
 	return 0;
 }

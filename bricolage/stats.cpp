@@ -11,7 +11,7 @@
 
 
 StatsManager::StatsManager() {
-	thread = std::thread(collector, this);
+	//thread = std::thread(collector, this);
 }
 
 void StatsManager::AddVar(std::string name, Variable* pVar) {
