@@ -8,6 +8,7 @@ extern std::atomic<long long> count;
 class Object {
 protected:
 	Object();
+	Object::Object(const Object&);
 	virtual ~Object();
 };
 

@@ -2,6 +2,14 @@
 #include <windows.h>
 #include <Psapi.h>
 
+#ifdef _DEBUG   
+#ifndef DBG_NEW      
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )      
+#define new DBG_NEW   
+#endif
+#endif  // _DEBUG
+
+
 StatsManager::StatsManager() {
 	thread = std::thread(collector, this);
 }
@@ -30,7 +38,7 @@ void StatsManager::RemoveVar(std::string name) {
 void StatsManager::collector(StatsManager* self) {
 	while (true) {
 		self->lock.lock();
-
+		/*
 		std::cout << GetTickCount();
 		std::cout << "\t";
 
@@ -51,8 +59,8 @@ void StatsManager::collector(StatsManager* self) {
 		auto objects = self->vars["objects"];
 		if (objects)
 			std::cout << objects->get().c_str();
-
-		std::cout << std::endl;
+		*/
+		//std::cout << std::endl;
 		/*
 			//for (auto it = self->vars.begin(); it != self->vars.end(); it++) {
 			std::cout << it->first.c_str();

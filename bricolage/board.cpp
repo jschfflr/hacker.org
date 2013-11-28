@@ -2,6 +2,13 @@
 #include "board.h"
 #include <stack>
 
+#ifdef _DEBUG   
+#ifndef DBG_NEW      
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )      
+#define new DBG_NEW   
+#endif
+#endif  // _DEBUG
+
 Board::Board() {
 	_width = _height = 0;
 	data = 0;
@@ -16,12 +23,18 @@ Board::Board(int width, int height, std::string board) {
 }
 
 Board::Board(const Board& board) {
-	*this = board;
+	this->_width = board._width;
+	this->_height = board._height;
+	//if (this->data) delete[] this->data;
+	this->data = new char[board._width * board._height + 1];
+	memcpy(this->data, board.data, board._width * board._height);
+	this->data[board._width * board._height] = '\0';
 }
 
 Board& Board::operator =(const Board& board) {
 	this->_width = board._width;
 	this->_height = board._height;
+	if (this->data) delete[] this->data;
 	this->data = new char[board._width * board._height + 1];
 	memcpy(this->data, board.data, board._width * board._height);
 	this->data[board._width * board._height] = '\0';
@@ -32,6 +45,8 @@ Board& Board::operator =(const Board& board) {
 Board::~Board() {
 	if( this->data )
 		delete [] this->data;
+
+	this->data = 0;
 }
 
 /*

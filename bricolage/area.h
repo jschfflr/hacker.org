@@ -2,8 +2,9 @@
 #define __AREA_H__
 
 #include <list>
+#include "object.h"
 
-struct Area {
+struct Area : public Object{
 	char color;
 	std::list<std::pair<int,int>> points;
 

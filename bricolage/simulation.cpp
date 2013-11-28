@@ -5,6 +5,14 @@
 
 #include "stats.h"
 
+#ifdef _DEBUG   
+#ifndef DBG_NEW      
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )      
+#define new DBG_NEW   
+#endif
+#endif  // _DEBUG
+
+
 template<class T>
 class StackSize : public Variable {
 	std::stack<T>* stack;
@@ -23,11 +31,11 @@ public:
 Simulation::Simulation(Board& board) {
 	State start(board);
 	stack.push(start);
-	StatsManager::Get().AddVar("stack", new StackSize<State>(&this->stack));
+	//StatsManager::Get().AddVar("stack", new StackSize<State>(&this->stack));
 }
 
 Simulation::~Simulation() {
-	StatsManager::Get().RemoveVar("stack");
+	//StatsManager::Get().RemoveVar("stack");
 }
 
 void Simulation::resolve(std::list<std::pair<int, int>> path) {

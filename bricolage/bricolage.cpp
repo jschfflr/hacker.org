@@ -8,6 +8,14 @@
 #include "request.h"
 #include "simulation.h"
 
+#ifdef _DEBUG   
+#ifndef DBG_NEW      
+#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )      
+#define new DBG_NEW   
+#endif
+#endif  // _DEBUG
+
+
 static std::regex r_width("x=(\\d+)");
 static std::regex r_height("y=(\\d+)");
 static std::regex r_board("board=([^&\"]+)");
@@ -78,12 +86,22 @@ Level solve(std::string data) {
 		return Level(level, b, path.str());
 	} catch(std::exception &e) {
 		std::cout << "Something went wrong: " << e.what() << std::endl;
+		return Level(level, b, "false");
 	}
 }
 
 int main(int argc, char* argv[]) {
 
-	StatsManager::Get().AddVar("objects", new StaticVariable<std::atomic<long long>>(&count));
+	//StatsManager::Get().AddVar("objects", new StaticVariable<std::atomic<long long>>(&count));
+
+	_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDOUT);
+	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDOUT);
+	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDOUT);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	try {
 		request("www.hacker.org", "/brick/index.php?name=hacker1338&password=test1234&gotolevel=0");
@@ -99,6 +117,8 @@ int main(int argc, char* argv[]) {
 		std::cout << e.what() << std::endl;
 		return -1;
 	}
+
+	_CrtDumpMemoryLeaks();
 
 	return 0;
 }
