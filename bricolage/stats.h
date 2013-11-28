@@ -3,9 +3,9 @@
 
 #include <map>
 #include <mutex>
+#include <thread>
 #include <sstream>
 #include <iostream>
-#include <windows.h>
 
 #include <iostream>
 
@@ -54,15 +54,16 @@ class StatsManager {
 
 	std::mutex lock;
 	std::map<std::string, Variable*> vars;
-	HANDLE thread;
+	std::thread thread;
 
 public:
 	StatsManager();
-	void AddVar(std::string name, Variable*);
-	void StatsManager::RemoveVar(std::string name);
+	void AddVar(std::string name, Variable*); 
+	Variable* GetVar(std::string name);
+	void RemoveVar(std::string name);
 
 private:
-	static DWORD WINAPI collector(void* p);
+	static void collector(StatsManager* p);
 	static StatsManager& instance;
 
 public:

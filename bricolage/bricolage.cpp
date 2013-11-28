@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "stats.h"
+#include "object.h"
 #include "request.h"
 #include "simulation.h"
 
@@ -80,6 +82,8 @@ Level solve(std::string data) {
 }
 
 int main(int argc, char* argv[]) {
+
+	StatsManager::Get().AddVar("objects", new StaticVariable<std::atomic<long long>>(&count));
 
 	try {
 		request("www.hacker.org", "/brick/index.php?name=hacker1338&password=test1234&gotolevel=0");

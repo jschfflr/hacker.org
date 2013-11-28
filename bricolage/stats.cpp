@@ -1,8 +1,9 @@
 #include "stats.h"
+#include <windows.h>
 #include <Psapi.h>
 
 StatsManager::StatsManager() {
-	thread = CreateThread(NULL, 0, StatsManager::collector, this, 0, NULL);
+	thread = std::thread(collector, this);
 }
 
 void StatsManager::AddVar(std::string name, Variable* pVar) {
@@ -13,15 +14,20 @@ void StatsManager::AddVar(std::string name, Variable* pVar) {
 	lock.unlock();
 }
 
+Variable* StatsManager::GetVar(std::string name) {
+	lock.lock();
+		Variable* p = vars[name];
+	lock.unlock();
+	return p;
+}
+
 void StatsManager::RemoveVar(std::string name) {
 	lock.lock();
 		vars.erase(name);
 	lock.unlock();
 }
 
-DWORD WINAPI StatsManager::collector(void* p) {
-	StatsManager* self = static_cast<StatsManager*>(p);
-
+void StatsManager::collector(StatsManager* self) {
 	while (true) {
 		self->lock.lock();
 
@@ -39,7 +45,13 @@ DWORD WINAPI StatsManager::collector(void* p) {
 			GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters));
 			std::cout << counters.WorkingSetSize;
 		}
-		
+
+		std::cout << "\t";
+
+		auto objects = self->vars["objects"];
+		if (objects)
+			std::cout << objects->get().c_str();
+
 		std::cout << std::endl;
 		/*
 			//for (auto it = self->vars.begin(); it != self->vars.end(); it++) {
@@ -52,8 +64,6 @@ DWORD WINAPI StatsManager::collector(void* p) {
 		self->lock.unlock();
 		Sleep(1000);
 	}
-
-	return 0;
 }
 
 StatsManager& StatsManager::Get() {

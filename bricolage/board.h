@@ -5,7 +5,7 @@
 
 #include "area.h"
 
-class Board {
+class Board{
 public:
 	enum {
 		EMPTY = '.',

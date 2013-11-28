@@ -88,6 +88,7 @@
   <ItemGroup>
     <ClCompile Include="board.cpp" />
     <ClCompile Include="bricolage.cpp" />
+    <ClCompile Include="object.cpp" />
     <ClCompile Include="simulation.cpp" />
     <ClCompile Include="request.cpp" />
     <ClCompile Include="state.cpp" />
@@ -96,6 +97,7 @@
   <ItemGroup>
     <ClInclude Include="area.h" />
     <ClInclude Include="board.h" />
+    <ClInclude Include="object.h" />
     <ClInclude Include="request.h" />
     <ClInclude Include="simulation.h" />
     <ClInclude Include="state.h" />
