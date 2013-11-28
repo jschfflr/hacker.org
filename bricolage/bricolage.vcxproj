@@ -91,6 +91,7 @@
     <ClCompile Include="simulation.cpp" />
     <ClCompile Include="request.cpp" />
     <ClCompile Include="state.cpp" />
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="area.h" />
@@ -98,6 +99,7 @@
     <ClInclude Include="request.h" />
     <ClInclude Include="simulation.h" />
     <ClInclude Include="state.h" />
+    <ClInclude Include="timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
