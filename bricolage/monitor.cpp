@@ -12,7 +12,8 @@ monitor::~monitor() {
 
 void monitor::emit(const event& event) {
 	mutex.lock();
-	stream << timer.millis() << "\t" << (std::string)event << std::endl;
+		stream << timer.millis() << "\t" << (std::string)event << std::endl;
+		std::cout << timer.millis() << "\t" << (std::string)event << std::endl;
 	mutex.release();
 }
 

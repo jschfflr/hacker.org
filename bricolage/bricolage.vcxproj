@@ -105,6 +105,7 @@
     <ClInclude Include="object.h" />
     <ClInclude Include="request.h" />
     <ClInclude Include="simulation.h" />
+    <ClInclude Include="stack.h" />
     <ClInclude Include="state.h" />
     <ClInclude Include="stats.h" />
     <ClInclude Include="timer.h" />

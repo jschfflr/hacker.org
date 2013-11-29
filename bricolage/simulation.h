@@ -7,11 +7,12 @@
 #include <windows.h>
 #include "state.h"
 #include "mutex.h"
+#include "stack.h"
 
 class Simulation {
 private:
 	mutex stack_lock;
-	std::stack<state> stack;
+	stack<state> stack;
 	std::list<std::pair<int, int>> path;
 	std::list<std::thread> threads;
 

@@ -29,10 +29,10 @@ public:
 	}
 };
 
-Simulation::Simulation(Board& board) {
+Simulation::Simulation(Board& board):
+	stack(256){
 	state start(board);
 	stack.push(start);
-	//StatsManager::Get().AddVar("stack", new StackSize<State>(&this->stack));
 }
 
 Simulation::~Simulation() {
@@ -49,19 +49,21 @@ void Simulation::thread(Simulation* self) {
 	state state;
 	while (self->running) {
 		self->stack_lock.lock();
-		monitor::_emit(monitor::event("stack") << self->stack.size());
-		if (self->stack.empty()) {
+			//monitor::_emit(monitor::event("stack") << self->stack.size());
+			
+		::state* p = self->stack.pop();
+		if ( !p ) {
 			self->stack_lock.unlock();
-			Sleep(100); 
+			Sleep(10);
+			continue;
 		}
 		else {
-			state = self->stack.top();
-			self->stack.pop();
+			state = *p;
 			self->stack_lock.unlock();
 		}
 		
 #ifdef _DEBUG
-		monitor::_emit(monitor::event("state") << state.board.width() << state.board.height() << state.board.serialize() << std::thread::id() << state.path());
+		//monitor::_emit(monitor::event("state") << state.board.width() << state.board.height() << state.board.serialize() << std::thread::id() << state.path());
 #endif
 		auto areas = state.board.areas();
 
