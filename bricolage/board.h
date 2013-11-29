@@ -17,6 +17,8 @@ private:
 	char* data;
 
 public:
+	std::list<Area> _areas;
+
 	Board();
 	~Board();
 	Board::Board(const Board& board);

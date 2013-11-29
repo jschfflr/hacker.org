@@ -95,15 +95,15 @@ Level solve(std::string data) {
 
 int main(int argc, char* argv[]) {
 #if _DEBUG
-	std::string version = "multithreaded,custommutex,customstack,debug";
+	std::string version = "multithreaded,custommutex,customstack,heap,debug";
 #else
-	std::string version = "multithreaded,custommutex,customstack,release";
+	std::string version = "multithreaded,custommutex,customstack,heap,release";
 #endif
 	
 	monitor::create("events.log");
 
 	try {
-		int level = 23;
+		int level = 0;
 		std::string data = "";
 		while(true) {
 			timer t;

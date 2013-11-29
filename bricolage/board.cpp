@@ -29,6 +29,8 @@ Board::Board(const Board& board) {
 	this->data = new char[board._width * board._height + 1];
 	memcpy(this->data, board.data, board._width * board._height);
 	this->data[board._width * board._height] = '\0';
+
+	this->_areas = board._areas;
 }
 
 Board& Board::operator =(const Board& board) {
@@ -38,6 +40,8 @@ Board& Board::operator =(const Board& board) {
 	this->data = new char[board._width * board._height + 1];
 	memcpy(this->data, board.data, board._width * board._height);
 	this->data[board._width * board._height] = '\0';
+	
+	this->_areas = board._areas;
 
 	return *this;
 }

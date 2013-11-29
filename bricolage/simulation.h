@@ -8,11 +8,12 @@
 #include "state.h"
 #include "mutex.h"
 #include "stack.h"
+#include <vector>
 
 class Simulation {
 private:
 	mutex stack_lock;
-	stack<state> stack;
+	std::vector<state> stack;
 	std::list<std::pair<int, int>> path;
 	std::list<std::thread> threads;
 

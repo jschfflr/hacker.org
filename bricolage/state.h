@@ -15,6 +15,10 @@ public:
 
 	std::string path() const ;
 
+	inline bool operator <(const state& other) const {
+		return board._areas.size() > other.board._areas.size();
+	}
+
 private:
 	void update();
 };

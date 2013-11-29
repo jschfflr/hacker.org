@@ -2,7 +2,7 @@
 #include <iostream>
 #include <windows.h>
 #include <process.h>
-
+#include <algorithm>
 #include "stats.h"
 #include "monitor.h"
 
@@ -29,10 +29,14 @@ public:
 	}
 };
 
-Simulation::Simulation(Board& board):
-	stack(256){
+Simulation::Simulation(Board& board){
+	board._areas = board.areas();
 	state start(board);
-	stack.push(start);
+
+	stack.resize(256);
+	std::make_heap(stack.begin(), stack.end());
+	stack.push_back(start);
+	std::push_heap(stack.begin(), stack.end());
 }
 
 Simulation::~Simulation() {
@@ -53,29 +57,29 @@ void Simulation::thread(Simulation* self) {
 			
 		if ( self->stack.empty() ) {
 			self->stack_lock.unlock();
-			Sleep(100);
+			Sleep(10);
 			continue;
 		}
 		else {
-			state = self->stack.top();
-			self->stack.pop();
+			state = self->stack.front();
+			std::pop_heap(self->stack.begin(), self->stack.end()); self->stack.pop_back();
 			self->stack_lock.unlock();
 		}
 		
 #ifdef _DEBUG
 		//monitor::_emit(monitor::event("state") << state.board.width() << state.board.height() << state.board.serialize() << std::thread::id() << state.path());
 #endif
-		auto areas = state.board.areas();
 		//monitor::_emit(monitor::event("area") << areas.size());
-		if (areas.size() == 0 && !state.board.empty())
+		if (state.board._areas.size() == 0 && !state.board.empty())
 			continue; // 
 
-		for (auto it = areas.begin(); it != areas.end(); it++) {
+		for (auto it = state.board._areas.begin(); it != state.board._areas.end(); it++) {
 			if (it->size() < 3)
 				continue;
 
 			::state test = ::state(state);
 			test.click(*it);
+			test.board._areas = test.board.areas();
 
 			if (test.board.empty()) {
 				// SOLUTION
@@ -84,7 +88,8 @@ void Simulation::thread(Simulation* self) {
 			}
 			else {
 				self->stack_lock.lock();
-					self->stack.push(test);
+					self->stack.push_back(test);
+					std::push_heap(self->stack.begin(), self->stack.end());
 				self->stack_lock.unlock();
 			}
 		}
