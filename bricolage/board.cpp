@@ -1,6 +1,6 @@
 
 #include "board.h"
-#include <stack>
+#include "stack.h"
 
 #ifdef _DEBUG   
 #ifndef DBG_NEW      
@@ -97,9 +97,10 @@ bool Board::empty() {
 
 // Get all areas in the current field
 std::list<Area> Board::areas() {
-	std::stack<std::pair<int,int>> stack;
+	::stack<std::pair<int,int>> stack(_width * _height);
 	std::list<Area> areas;
-	std::string tmp = data;
+	char* tmp = new char[_width * _height];
+	memcpy(tmp, data, _width * _height);
 
 	char color;
 	for(int y = 0; y < _height; y++) {
@@ -112,7 +113,7 @@ std::list<Area> Board::areas() {
 			Area area(color);
 			stack.push(std::pair<int,int>(x, y));
 
-			while(!stack.empty()) {
+			while(stack.size()) {
 				auto c = stack.top();
 				stack.pop();
 
@@ -135,7 +136,7 @@ std::list<Area> Board::areas() {
 			areas.push_back( area );
 		}
 	}
-
+	delete[] tmp;
 	return areas;
 }
 

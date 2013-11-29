@@ -101,8 +101,9 @@ int main(int argc, char* argv[]) {
 #endif
 	
 	monitor::create("events.log");
+
 	try {
-		int level = 22;
+		int level = 23;
 		std::string data = "";
 		while(true) {
 			timer t;

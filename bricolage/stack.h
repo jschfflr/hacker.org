@@ -4,8 +4,8 @@
 template<class T>
 class stack {
 	T* _stack;
-	size_t _top;
-	size_t _size;
+	int _top;
+	int _size;
 
 public:
 	stack(size_t size) {
@@ -20,16 +20,21 @@ public:
 	void push(T& value) {
 		if (_top == _size - 1)
 			throw std::runtime_error("Stackoverflow");
-		_stack[++_top] = value;
+		_stack[++_top] = T(value);
 	}
 
-	T* pop() {
+	T top() {
+		return T(_stack[_top]);
+	}
+
+	void pop() {
 		if (_top == -1)
-			return 0;
-		return &_stack[_top--];
+			return;
+		_top--;
 	}
 
 	inline size_t size() const { return _top + 1; }
+	inline bool empty() const { return _top == -1; }
 };
 
 #endif

@@ -51,14 +51,14 @@ void Simulation::thread(Simulation* self) {
 		self->stack_lock.lock();
 			//monitor::_emit(monitor::event("stack") << self->stack.size());
 			
-		::state* p = self->stack.pop();
-		if ( !p ) {
+		if ( self->stack.empty() ) {
 			self->stack_lock.unlock();
-			Sleep(10);
+			Sleep(100);
 			continue;
 		}
 		else {
-			state = *p;
+			state = self->stack.top();
+			self->stack.pop();
 			self->stack_lock.unlock();
 		}
 		
@@ -66,7 +66,7 @@ void Simulation::thread(Simulation* self) {
 		//monitor::_emit(monitor::event("state") << state.board.width() << state.board.height() << state.board.serialize() << std::thread::id() << state.path());
 #endif
 		auto areas = state.board.areas();
-
+		//monitor::_emit(monitor::event("area") << areas.size());
 		if (areas.size() == 0 && !state.board.empty())
 			continue; // 
 
