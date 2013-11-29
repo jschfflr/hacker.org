@@ -82,9 +82,9 @@ Level solve(std::string data) {
 
 int main(int argc, char* argv[]) {
 #if _DEBUG
-	std::string version = "multithreaded,custommutex,debug";
+	std::string version = "singlethreaded,custommutex,debug";
 #else
-	std::string version = "multithreaded,custommutex,release";
+	std::string version = "singlethreaded,release";
 #endif
 	
 	try {
