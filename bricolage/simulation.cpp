@@ -4,6 +4,7 @@
 #include <process.h>
 
 #include "stats.h"
+#include "monitor.h"
 
 #ifdef _DEBUG   
 #ifndef DBG_NEW      
@@ -29,7 +30,7 @@ public:
 };
 
 Simulation::Simulation(Board& board) {
-	State start(board);
+	state start(board);
 	stack.push(start);
 	//StatsManager::Get().AddVar("stack", new StackSize<State>(&this->stack));
 }
@@ -45,10 +46,10 @@ void Simulation::resolve(std::list<std::pair<int, int>> path) {
 }
 
 void Simulation::thread(Simulation* self) {
-	State state;
+	state state;
 	while (self->running) {
 		self->stack_lock.lock();
-
+		monitor::_emit(monitor::event("stack") << self->stack.size());
 		if (self->stack.empty()) {
 			self->stack_lock.unlock();
 			Sleep(100); 
@@ -59,6 +60,9 @@ void Simulation::thread(Simulation* self) {
 			self->stack_lock.unlock();
 		}
 		
+#ifdef _DEBUG
+		monitor::_emit(monitor::event("state") << state.board.width() << state.board.height() << state.board.serialize() << std::thread::id() << state.path());
+#endif
 		auto areas = state.board.areas();
 
 		if (areas.size() == 0 && !state.board.empty())
@@ -68,7 +72,7 @@ void Simulation::thread(Simulation* self) {
 			if (it->size() < 3)
 				continue;
 
-			State test = State(state);
+			::state test = ::state(state);
 			test.click(*it);
 
 			if (test.board.empty()) {
@@ -98,7 +102,7 @@ std::list<std::pair<int,int>> Simulation::run() {
 
 
 std::list<Board> Simulation::run(Board& b, std::list<std::pair<int,int>> path) {
-	State state(b);
+	state state(b);
 	std::cout << (std::string)state.board << std::endl;
 	for( auto click: path) {
 		state.click(click);

@@ -11,7 +11,7 @@
 class Simulation {
 private:
 	mutex stack_lock;
-	std::stack<State> stack;
+	std::stack<state> stack;
 	std::list<std::pair<int, int>> path;
 	std::list<std::thread> threads;
 

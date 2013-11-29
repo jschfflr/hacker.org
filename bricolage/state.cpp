@@ -8,24 +8,24 @@
 #endif  // _DEBUG
 
 
-State::State() {
+state::state() {
 	this->board = Board();
 }
 
-State::State(Board board) {
+state::state(Board board) {
 	this->board = board;
 }
 
-void State::click(std::pair<int,int> click) {
+void state::click(std::pair<int,int> click) {
 	auto areas = board.areas();
 	for( auto area: areas) {
 		auto it = std::find(area.points.begin(), area.points.end(), click);
 		if( it != area.points.end() )
-			return State::click( area );
+			return state::click( area );
 	}
 }
 
-void State::click(Area &area) {
+void state::click(Area &area) {
 	for( auto it = area.points.begin(); it != area.points.end(); it++)
 		board.set(it->first, it->second, '.');
 
@@ -34,7 +34,7 @@ void State::click(Area &area) {
 	clicks.push_back( area.points.front() );
 }
 
-void State::update() {
+void state::update() {
 	int changes = 0;
 	do {
 		changes = 0;
@@ -73,5 +73,20 @@ void State::update() {
 			}
 		}
 	} while( changes );
+}
 
+#include <iomanip>
+#include <sstream>
+
+std::string state::path() const {
+	std::stringstream path;
+	path.setf(std::ios::hex, std::ios::basefield);
+	path.setf(std::ios::right, std::ios::adjustfield);
+	path.fill('0');
+
+	for (auto it = clicks.begin(); it != clicks.end(); it++) {
+		path << std::setw(2) << it->first;
+		path << std::setw(2) << it->second;
+	}
+	return path.str();
 }

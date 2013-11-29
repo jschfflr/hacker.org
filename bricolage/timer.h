@@ -9,7 +9,8 @@ private:
 	static LARGE_INTEGER frequenzy;
 public:
 	timer();
-	double get();
+	double get() const ;
+	unsigned long millis() const ;
 };
 
 #endif

@@ -7,10 +7,14 @@ timer::timer() {
 		QueryPerformanceFrequency(&frequenzy);
 }
 
-double timer::get() {
+double timer::get() const {
 	LARGE_INTEGER now;
 	QueryPerformanceCounter(&now);
 	return (now.QuadPart - start.QuadPart) / double(frequenzy.QuadPart);
+}
+
+unsigned long timer::millis() const {
+	return static_cast<unsigned long>(get() * 1000 );
 }
 
 LARGE_INTEGER timer::frequenzy = {0};

@@ -6,6 +6,7 @@
 #include "stats.h"
 #include "object.h"
 #include "timer.h"
+#include "monitor.h"
 #include "request.h"
 #include "simulation.h"
 
@@ -92,8 +93,6 @@ Level solve(std::string data) {
 }
 
 
-#include "mutex.h"
-
 int main(int argc, char* argv[]) {
 #if _DEBUG
 	std::string version = "multithreaded,custommutex,debug";
@@ -101,6 +100,7 @@ int main(int argc, char* argv[]) {
 	std::string version = "multithreaded,custommutex,release";
 #endif
 	
+	monitor::create("events.log");
 	try {
 		int level = 0;
 		std::string data = "";
@@ -129,7 +129,8 @@ int main(int argc, char* argv[]) {
 			
 
 			request("bricolage.exesystem.net", url3.str());
-			std::cerr << level.number << std::endl << (std::string)level.board << std::endl << level.solution << std::endl;
+			monitor::_emit(monitor::event("solved") << level.number << int(t.get() * 1000) << level.solution);
+			//std::cerr << level.number << std::endl << (std::string)level.board << std::endl << level.solution << std::endl;
 		}
 	} catch(std::exception e) {
 		std::cout << e.what() << std::endl;

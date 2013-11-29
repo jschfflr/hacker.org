@@ -88,6 +88,7 @@
   <ItemGroup>
     <ClCompile Include="board.cpp" />
     <ClCompile Include="bricolage.cpp" />
+    <ClCompile Include="monitor.cpp" />
     <ClCompile Include="mutex.cpp" />
     <ClCompile Include="object.cpp" />
     <ClCompile Include="simulation.cpp" />
@@ -99,6 +100,7 @@
   <ItemGroup>
     <ClInclude Include="area.h" />
     <ClInclude Include="board.h" />
+    <ClInclude Include="monitor.h" />
     <ClInclude Include="mutex.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="request.h" />
