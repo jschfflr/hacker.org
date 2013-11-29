@@ -30,6 +30,7 @@ public:
 };
 
 Simulation::Simulation(Board& board){
+	possibilities = 0;
 	board._areas = board.areas();
 	state start(board);
 
@@ -57,12 +58,13 @@ void Simulation::thread(Simulation* self) {
 			
 		if ( self->stack.empty() ) {
 			self->stack_lock.unlock();
-			Sleep(10);
+			Sleep(1);
 			continue;
 		}
 		else {
 			state = self->stack.front();
 			std::pop_heap(self->stack.begin(), self->stack.end()); self->stack.pop_back();
+			self->possibilities += static_cast<unsigned long long>(state.board._areas.size());
 			self->stack_lock.unlock();
 		}
 		
@@ -98,12 +100,15 @@ void Simulation::thread(Simulation* self) {
 
 std::list<std::pair<int,int>> Simulation::run() {
 	running = true;
+	timer t;
 	for (unsigned int i = 0; i < std::thread::hardware_concurrency(); i++)
 		threads.push_back(std::thread(thread, this));
 
 	for (auto it = threads.begin(); it != threads.end(); it++)
 		it->join();
-	
+
+	monitor::_emit(monitor::event("possibilities") << possibilities << t.get());
+
 	return path;
 }
 

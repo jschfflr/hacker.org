@@ -18,6 +18,7 @@ private:
 	std::list<std::thread> threads;
 
 	volatile bool running;
+	unsigned long long possibilities;
 	static void thread(Simulation* pContext);
 
 	void resolve(std::list<std::pair<int, int>>);
