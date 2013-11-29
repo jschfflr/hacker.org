@@ -5,6 +5,7 @@
 
 #include "stats.h"
 #include "object.h"
+#include "timer.h"
 #include "request.h"
 #include "simulation.h"
 
@@ -94,27 +95,41 @@ Level solve(std::string data) {
 #include "mutex.h"
 
 int main(int argc, char* argv[]) {
-
-	//StatsManager::Get().AddVar("objects", new StaticVariable<std::atomic<long long>>(&count));
-	/*
-	_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
-	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDOUT);
-	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDOUT);
-	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDOUT);
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	*/
+#if _DEBUG
+	std::string version = "multithreaded,custommutex,debug";
+#else
+	std::string version = "multithreaded,custommutex,release";
+#endif
+	
 	try {
-		request("www.hacker.org", "/brick/index.php?name=hacker1338&password=test1234&gotolevel=0");
-		std::string data = request("www.hacker.org", "/brick/index.php?name=hacker1338&password=test1234");
+		int level = 0;
+		std::string data = "";
 		while(true) {
+			timer t;
+
+			std::stringstream url1;
+			url1 << "/brick/index.php?name=hakker1337&password=test1234&gotolevel=" << level++;
+			data = request("www.hacker.org", url1.str());
+			
+			
 			Level level = solve(data);
-			std::string url = "/brick/index.php?name=hacker1338&password=test1234&path=";
-			url += level.solution;
-			data = request("www.hacker.org", url);
-			std::cerr << level.number <<  std::endl << (std::string)level.board << std::endl << level.solution << std::endl;
+			
+			std::stringstream url2;
+			url2 << "/brick/index.php?name=hakker1337&password=test1234&gotolevel=";
+			url2 << level.number;
+			url2 << "&path=" << level.solution;
+			data = request("www.hacker.org", url2.str());
+
+
+			std::stringstream url3;
+			url3 << "?lvl=" << level.number;
+			url3 << "&time=" << int(t.get() * 1000);
+			url3 << "&version=" << version;
+			url3 << "&path=" << level.solution;
+			
+
+			request("bricolage.exesystem.net", url3.str());
+			std::cerr << level.number << std::endl << (std::string)level.board << std::endl << level.solution << std::endl;
 		}
 	} catch(std::exception e) {
 		std::cout << e.what() << std::endl;
