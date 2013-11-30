@@ -24,14 +24,12 @@ public:
 };
 
 Simulation::Simulation(Board& board):
-	heap(512){
+	heap(4096){
 	samples = 0;
 	possibilities = 0;
 
 	board._areas = board.areas();
-	state start(board);
-
-	heap.insert(start);
+	heap.insert(new state(board) );
 }
 
 Simulation::~Simulation() {
@@ -46,7 +44,7 @@ void Simulation::resolve(std::list<std::pair<int, int>> path) {
 
 void Simulation::thread(Simulation* self) {
 	try {
-		state state;
+		state* state;
 		while (self->running) {
 			self->stack_lock.lock();
 			//monitor::_emit(monitor::event("stack") << self->stack.size());
@@ -59,28 +57,28 @@ void Simulation::thread(Simulation* self) {
 			else {
 				self->heap.pop(state);
 				self->samples++;
-				self->possibilities += static_cast<unsigned long long>(state.board._areas.size());
+				self->possibilities += static_cast<unsigned long long>(state->board._areas.size());
 				self->stack_lock.unlock();
 			}
 
 #ifdef _DEBUG
 			//monitor::_emit(monitor::event("state") << state.board.width() << state.board.height() << state.board.serialize() << std::thread::id() << state.path());
 #endif
-			//monitor::_emit(monitor::event("area") << areas.size());
-			if (state.board._areas.size() == 0 && !state.board.empty())
+			if (state->board._areas.size() == 0 && !state->board.empty())
 				continue; // 
 
-			for (auto it = state.board._areas.begin(); it != state.board._areas.end(); it++) {
+			for (auto it = state->board._areas.begin(); it != state->board._areas.end(); it++) {
 				if (it->size() < 3)
 					continue;
 
-				::state test = ::state(state);
-				test.click(*it);
-				test.board._areas = test.board.areas();
+				::state* test = new ::state(*state);
+				test->click(*it);
+				test->board._areas = test->board.areas();
 
-				if (test.board.empty()) {
+				if (test->board.empty()) {
 					// SOLUTION
-					self->resolve(test.clicks);
+					self->resolve(test->clicks);
+					delete test;
 					return;
 				}
 				else {
@@ -89,6 +87,8 @@ void Simulation::thread(Simulation* self) {
 					self->stack_lock.unlock();
 				}
 			}
+
+			delete state;
 		}
 	}
 	catch (std::exception e) {

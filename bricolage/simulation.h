@@ -12,7 +12,7 @@
 class Simulation {
 private:
 	mutex stack_lock;
-	heap<state> heap;
+	heap<state*> heap;
 	std::list<std::pair<int, int>> path;
 	std::list<std::thread> threads;
 

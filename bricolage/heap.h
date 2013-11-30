@@ -49,10 +49,10 @@ public:
 private:
 	inline void swap(int a, int b) {
 		std::swap(_heap[a], _heap[b]);
-		return;
-		memcpy(&tmp, &_heap[a], sizeof(T));
-		memcpy(&_heap[a], &_heap[b], sizeof(T));
-		memcpy(&_heap[b], &tmp, sizeof(T));
+		//return;
+		//memcpy(&tmp, &_heap[a], sizeof(T));
+		//memcpy(&_heap[a], &_heap[b], sizeof(T));
+		//memcpy(&_heap[b], &tmp, sizeof(T));
 	}
 
 	inline void decrease(int i) {
