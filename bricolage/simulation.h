@@ -8,16 +8,17 @@
 #include "state.h"
 #include "mutex.h"
 #include "stack.h"
-#include <vector>
+#include "heap.h"
 
 class Simulation {
 private:
 	mutex stack_lock;
-	std::vector<state> stack;
+	heap<state> heap;
 	std::list<std::pair<int, int>> path;
 	std::list<std::thread> threads;
 
 	volatile bool running;
+	unsigned long long samples;
 	unsigned long long possibilities;
 	static void thread(Simulation* pContext);
 

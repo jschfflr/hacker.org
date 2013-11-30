@@ -3,3 +3,5 @@ Release
 *.opensdf
 *.sdf
 *.v11.suo
+*.log
+*.txt

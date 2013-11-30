@@ -29,15 +29,15 @@ public:
 	}
 };
 
-Simulation::Simulation(Board& board){
+Simulation::Simulation(Board& board):
+	heap(512){
+	samples = 0;
 	possibilities = 0;
+
 	board._areas = board.areas();
 	state start(board);
 
-	stack.resize(256);
-	std::make_heap(stack.begin(), stack.end());
-	stack.push_back(start);
-	std::push_heap(stack.begin(), stack.end());
+	heap.insert(start);
 }
 
 Simulation::~Simulation() {
@@ -51,50 +51,56 @@ void Simulation::resolve(std::list<std::pair<int, int>> path) {
 }
 
 void Simulation::thread(Simulation* self) {
-	state state;
-	while (self->running) {
-		self->stack_lock.lock();
+	try {
+		state state;
+		while (self->running) {
+			self->stack_lock.lock();
 			//monitor::_emit(monitor::event("stack") << self->stack.size());
-			
-		if ( self->stack.empty() ) {
-			self->stack_lock.unlock();
-			Sleep(1);
-			continue;
-		}
-		else {
-			state = self->stack.front();
-			std::pop_heap(self->stack.begin(), self->stack.end()); self->stack.pop_back();
-			self->possibilities += static_cast<unsigned long long>(state.board._areas.size());
-			self->stack_lock.unlock();
-		}
-		
-#ifdef _DEBUG
-		//monitor::_emit(monitor::event("state") << state.board.width() << state.board.height() << state.board.serialize() << std::thread::id() << state.path());
-#endif
-		//monitor::_emit(monitor::event("area") << areas.size());
-		if (state.board._areas.size() == 0 && !state.board.empty())
-			continue; // 
 
-		for (auto it = state.board._areas.begin(); it != state.board._areas.end(); it++) {
-			if (it->size() < 3)
+			if (self->heap.empty()) {
+				self->stack_lock.unlock();
+				Sleep(1);
 				continue;
-
-			::state test = ::state(state);
-			test.click(*it);
-			test.board._areas = test.board.areas();
-
-			if (test.board.empty()) {
-				// SOLUTION
-				self->resolve(test.clicks);
-				return;
 			}
 			else {
-				self->stack_lock.lock();
-					self->stack.push_back(test);
-					std::push_heap(self->stack.begin(), self->stack.end());
+				state = self->heap.min();
+				self->samples++;
+				self->possibilities += static_cast<unsigned long long>(state.board._areas.size());
 				self->stack_lock.unlock();
 			}
+
+#ifdef _DEBUG
+			//monitor::_emit(monitor::event("state") << state.board.width() << state.board.height() << state.board.serialize() << std::thread::id() << state.path());
+#endif
+			//monitor::_emit(monitor::event("area") << areas.size());
+			if (state.board._areas.size() == 0 && !state.board.empty())
+				continue; // 
+
+			for (auto it = state.board._areas.begin(); it != state.board._areas.end(); it++) {
+				if (it->size() < 3)
+					continue;
+
+				::state test = ::state(state);
+				test.click(*it);
+				test.board._areas = test.board.areas();
+
+				if (test.board.empty()) {
+					// SOLUTION
+					self->resolve(test.clicks);
+					return;
+				}
+				else {
+					self->stack_lock.lock();
+					self->heap.insert(test);
+					self->stack_lock.unlock();
+				}
+			}
 		}
+	}
+	catch (std::exception e) {
+		std::cerr << "Uncaught exception in thread: " << e.what() << std::endl;
+		_CrtDumpMemoryLeaks();
+		terminate();
 	}
 }
 
@@ -107,6 +113,7 @@ std::list<std::pair<int,int>> Simulation::run() {
 	for (auto it = threads.begin(); it != threads.end(); it++)
 		it->join();
 
+	monitor::_emit(monitor::event("samples") << samples << t.get());
 	monitor::_emit(monitor::event("possibilities") << possibilities << t.get());
 
 	return path;
