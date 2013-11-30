@@ -1,3 +1,6 @@
+#include "common.h"
+
+
 #include <regex>
 #include <iomanip>
 #include <iostream>
@@ -9,13 +12,6 @@
 #include "monitor.h"
 #include "request.h"
 #include "simulation.h"
-
-#ifdef _DEBUG   
-#ifndef DBG_NEW      
-#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )      
-#define new DBG_NEW   
-#endif
-#endif  // _DEBUG
 
 
 static std::regex r_width("x=(\\d+)");
@@ -103,7 +99,7 @@ int main(int argc, char* argv[]) {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	try {
-		int level = 3;
+		int level = 0;
 		std::string data = "";
 		while(true) {
 			timer t;

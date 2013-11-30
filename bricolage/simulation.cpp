@@ -6,13 +6,7 @@
 #include "stats.h"
 #include "monitor.h"
 
-#ifdef _DEBUG   
-#ifndef DBG_NEW      
-#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )      
-#define new DBG_NEW   
-#endif
-#endif  // _DEBUG
-
+#include <stack>
 
 template<class T>
 class StackSize : public Variable {
@@ -63,7 +57,7 @@ void Simulation::thread(Simulation* self) {
 				continue;
 			}
 			else {
-				state = self->heap.min();
+				self->heap.pop(state);
 				self->samples++;
 				self->possibilities += static_cast<unsigned long long>(state.board._areas.size());
 				self->stack_lock.unlock();

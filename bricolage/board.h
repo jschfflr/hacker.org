@@ -1,8 +1,9 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
-#include <string>
+#include "common.h"
 
+#include <string>
 #include "area.h"
 
 class Board{

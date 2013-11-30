@@ -1,12 +1,11 @@
 #ifndef __HEAP_H__
 #define __HEAP_H__
 
-#ifdef min
-#undef min
-#endif
+#include "common.h"
 
 template<class T>
 class heap {
+	T tmp;
 	T* _heap;
 	size_t _size;
 	size_t _capacity;
@@ -30,9 +29,8 @@ public:
 		decrease(i);
 	}
 
-	T remove(size_t i) {
-		T item = _heap[i];
-		_heap[i] = T();
+	void remove(size_t i, T& item) {
+		item = _heap[i];
 		swap(i, --_size);
 		if (i != _size) {
 			if (i == 0 || _heap[i] < _heap[parent(i)])
@@ -40,21 +38,21 @@ public:
 			else
 				decrease(i);
 		}
-
-		return item;
 	}
 
-	T min() {
-		return remove(0);
+	void pop(T& item) {
+		return remove(0, item);
 	}
 
 	inline size_t size() const { return _size; }
 	inline bool empty() const { return _size == 0; }
 private:
 	inline void swap(int a, int b) {
-		T tmp = _heap[a];
-		_heap[a] = _heap[b];
-		_heap[b] = tmp;
+		std::swap(_heap[a], _heap[b]);
+		return;
+		memcpy(&tmp, &_heap[a], sizeof(T));
+		memcpy(&_heap[a], &_heap[b], sizeof(T));
+		memcpy(&_heap[b], &tmp, sizeof(T));
 	}
 
 	inline void decrease(int i) {
@@ -79,9 +77,9 @@ private:
 		} while (true);
 	}
 
-	inline size_t parent(int i) const { return ( i - 1 ) / 2; }
-	inline size_t left(int i) const { return 2 * i + 1; }
-	inline size_t right(int i) const { return 2 * i + 2; }
+	inline size_t parent(int i) const { return i / 2; }
+	inline size_t left(int i) const { return 2 * i; }
+	inline size_t right(int i) const { return 2 * i + 1; }
 
 };
 

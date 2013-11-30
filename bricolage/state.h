@@ -1,6 +1,7 @@
 #ifndef __STATE_H__
 #define __STATE_H__
 
+#include "common.h"
 #include "board.h"
 
 class state {
@@ -16,7 +17,7 @@ public:
 	std::string path() const ;
 
 	inline bool operator <(const state& other) const {
-		return board._areas.size() > other.board._areas.size();
+		return board._areas.size() < other.board._areas.size();
 	}
 
 private:

@@ -1,6 +1,8 @@
 #ifndef __STACK_H__
 #define __STACK_H__
 
+#include "common.h"
+
 template<class T>
 class stack {
 	T* _stack;

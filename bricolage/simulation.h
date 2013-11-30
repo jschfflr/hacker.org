@@ -1,10 +1,9 @@
 #ifndef __SIMULATION_H__
 #define __SIMULATION_H__
 
-#include <stack>
-#include <mutex>
+#include "common.h"
+
 #include <thread>
-#include <windows.h>
 #include "state.h"
 #include "mutex.h"
 #include "stack.h"
