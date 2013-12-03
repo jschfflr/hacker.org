@@ -24,9 +24,9 @@ public:
 	char get(int x, int y) const;
 	void set(int x, int y, char c);
 
-	std::string debug();
+	std::string debug() const;
 	operator std::string();
-	bool empty();
+	bool empty() const;
 
 	// Get all areas in the current field
 	void areas(heap<area>& areas);
@@ -36,7 +36,7 @@ public:
 	inline int height() const { return _height; }
 	inline heap<area>* areas() const { return _areas; }
 
-	board* click(area& click);
+	board* click(area& click) const;
 };
 
 

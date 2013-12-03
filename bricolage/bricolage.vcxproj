@@ -90,6 +90,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="app.cpp" />
     <ClCompile Include="board.cpp" />
     <ClCompile Include="bricolage.cpp" />
     <ClCompile Include="monitor.cpp" />
@@ -102,6 +103,7 @@
     <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="app.h" />
     <ClInclude Include="area.h" />
     <ClInclude Include="board.h" />
     <ClInclude Include="common.h" />

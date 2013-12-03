@@ -3,106 +3,102 @@
 #include <windows.h>
 #include <process.h>
 #include <algorithm>
+#include <sstream>
+#include <iomanip>
 #include "stats.h"
 #include "monitor.h"
 
+
 #include <stack>
 
-template<class T>
-class StackSize : public Variable {
-	std::stack<T>* stack;
-public:
-	StackSize(std::stack<T>* stack) {
-		this->stack = stack;
-	}
-
-	std::string get() {
-		std::stringstream stream;
-		stream << stack->size();
-		return stream.str();
-	}
-};
-
-Simulation::Simulation(Board& board):
+simulation::simulation(const board& board):
 	heap(4096){
 	samples = 0;
 	possibilities = 0;
 
-	board._areas = board.areas();
-	heap.insert(new state(board) );
+	heap.insert(new state(&board) );
 }
 
-Simulation::~Simulation() {
+simulation::~simulation() {
 	//StatsManager::Get().RemoveVar("stack");
+	for (size_t i = 0; i < heap.size(); i++) {
+		delete heap[i];
+	}
 }
 
-void Simulation::resolve(std::list<std::pair<int, int>> path) {
-	if ( running ) 
-		this->path = path;
+void simulation::resolve(const state* state) {
+	heap_lock.lock();
+	if (running)
+		this->result = state;
+
 	running = false;
+	heap_lock.release();
 }
 
-void Simulation::thread(Simulation* self) {
-	try {
-		state* state;
-		while (self->running) {
-			self->stack_lock.lock();
-			//monitor::_emit(monitor::event("stack") << self->stack.size());
+void simulation::thread_wrapper(simulation* self) {
+	//try {
+		self->thread();
+	//}
+	//catch (std::exception e) {
+	//	monitor::_emit(monitor::event("exception") << "thread" << e.what());
+	//	terminate();
+	//}
+}
 
-			if (self->heap.empty()) {
-				self->stack_lock.unlock();
-				Sleep(1);
+void simulation::thread() {
+	state* state;
+	while (running) {
+		heap_lock.lock();
+
+		if (heap.empty()) {
+			// Nothing to do right now
+			heap_lock.unlock();
+			Sleep(1);
+			continue;
+		}
+		else {
+			heap.pop(state);
+			samples++;
+			possibilities += state->board()->areas()->size();
+			heap_lock.unlock();
+		}
+
+		std::cout << state->board()->debug() << std::endl;
+
+		if (state->board()->areas()->size() == 0 && !state->board()->empty()) {
+			delete state; //No more moves here
+			continue; // 
+		}
+
+		area area;
+		while (state->board()->areas()->pop(area)) {
+			// Can not click this area
+			if (area.size() < 3)
 				continue;
+
+			// perform click
+			::state *p = new ::state(state, state->board(), area);
+			std::cout << area.points[0].x << " " << area.points[0].y << std::endl;
+			
+			if (p->board()->empty()) {
+				return resolve(p);
 			}
 			else {
-				self->heap.pop(state);
-				self->samples++;
-				self->possibilities += static_cast<unsigned long long>(state->board._areas.size());
-				self->stack_lock.unlock();
+				heap_lock.lock();
+				heap.insert(p);
+				heap_lock.unlock();
 			}
-
-#ifdef _DEBUG
-			//monitor::_emit(monitor::event("state") << state.board.width() << state.board.height() << state.board.serialize() << std::thread::id() << state.path());
-#endif
-			if (state->board._areas.size() == 0 && !state->board.empty())
-				continue; // 
-
-			for (auto it = state->board._areas.begin(); it != state->board._areas.end(); it++) {
-				if (it->size() < 3)
-					continue;
-
-				::state* test = new ::state(*state);
-				test->click(*it);
-				test->board._areas = test->board.areas();
-
-				if (test->board.empty()) {
-					// SOLUTION
-					self->resolve(test->clicks);
-					delete test;
-					return;
-				}
-				else {
-					self->stack_lock.lock();
-					self->heap.insert(test);
-					self->stack_lock.unlock();
-				}
-			}
-
-			delete state;
 		}
-	}
-	catch (std::exception e) {
-		std::cerr << "Uncaught exception in thread: " << e.what() << std::endl;
-		_CrtDumpMemoryLeaks();
-		terminate();
+
+		delete state;
 	}
 }
 
-std::list<std::pair<int,int>> Simulation::run() {
+void simulation::run(std::string& path) {
 	running = true;
 	timer t;
 	for (unsigned int i = 0; i < std::thread::hardware_concurrency(); i++)
-		threads.push_back(std::thread(thread, this));
+		threads.push_back(std::thread(thread_wrapper, this));
 
 	for (auto it = threads.begin(); it != threads.end(); it++)
 		it->join();
@@ -110,10 +106,19 @@ std::list<std::pair<int,int>> Simulation::run() {
 	monitor::_emit(monitor::event("samples") << samples << t.get());
 	monitor::_emit(monitor::event("possibilities") << possibilities << t.get());
 
-	return path;
+	std::stringstream result;
+	const state* p = this->result;
+	result << std::hex << std::setfill('0');
+
+	while (p = p->parent() ) {
+		result << std::setw(2) << static_cast<unsigned>(p->click().x);
+		result << std::setw(2) << static_cast<unsigned>(p->click().y);
+	}
+
+	path = result.str();
 }
 
-
+#if 0
 std::list<Board> Simulation::run(Board& b, std::list<std::pair<int,int>> path) {
 	state state(b);
 	std::cout << (std::string)state.board << std::endl;
@@ -166,3 +171,4 @@ std::list<Board> Simulation::run(Board& b, std::list<std::pair<int,int>> path) {
 	throw std::logic_error("Invalid State");
 #endif
 }
+#endif

@@ -1,3 +1,4 @@
+#include <algorithm>
 
 #include "board.h"
 #include "stack.h"
@@ -84,7 +85,7 @@ void board::set(int x, int y, char c) {
 	_data[y + x * _height] = c;
 }
 
-std::string board::debug() {
+std::string board::debug() const {
 	std::string output = "";
 	for(int y = _height - 1; y >= 0; y--) {
 		for(int x = 0; x < _width; x++) {
@@ -102,7 +103,7 @@ board::operator std::string() {
 	return debug();
 }
 
-bool board::empty() {
+bool board::empty() const {
 	for(int y = 0; y < _height; y++) {
 		for(int x = 0; x < _width; x++) {
 			if( get(x, y) != '.')
@@ -149,7 +150,8 @@ void board::areas(heap<area>& areas) {
 				stack.push(point(c.x - 1, c.y));
 			}
 
-			areas.insert( area );
+			if (area.size())
+				areas.insert( area );
 		}
 	}
 	delete[] tmp;
@@ -165,37 +167,48 @@ std::string board::serialize() {
 	return tmp;
 }
 
-board* board::click(area& area) {
+board* board::click(area& area) const {
 	//initialise a new board with same dimensions
-	board* r = new board(_width, _height, _data);
+	board* result = new board(*this);
 
+	int left = _width, right = 0;
 	// remove all fields that are part of the area
 	// marking them with \0
 	for (auto it = area.points.begin(); it != area.points.end(); it++) {
-		r->set(it->x, it->y, '\0');
+		left = std::min(left, it->x);
+		right = std::max(right, it->x);
+		result->set(it->x, it->y, '-');
 	}
 	
 
 	//loop through all cols
-	for (int x = h.x; x < h.y; x++) {
+	for (int x = left; x < _width; x++) {
 		// if we find a cleared cell
 		char *src, *dst;
-		for (src = dst = &_data[x * _height]; src < &_data[(x + 1) * _height]; src++) {
+		for (src = dst = &result->_data[x * _height]; src < &result->_data[(x + 1) * _height]; src++) {
 			*dst = *src;
-			if (*dst != '\0' && *dst != '.' )
+			if (*dst != '-' && *dst != '.' )
 				dst++;
 		}
 		
-		memset(dst, '.', (int)&_data[(x + 1) * _height - (int)dst);
+		//memset(dst, '.', _height - int( dst - result->_data[x * _height]));
+		while (dst < &result->_data[(x + 1) * _height])
+			*dst++ = '.';
 	}
 
-	char *src, *dst;
-	for (src = dst = _data; src < &_data[_width * _height]; src += _height) {
+	char *src = result->_data, *dst;
+	while ((*src == '-' || *src == '.') && src < &result->_data[_width * _height])
+		src += _height;
+
+	for (dst = src; src < &result->_data[_width * _height]; src += _height) {
 		if (src != dst)
 			memcpy(dst, src, _height);
-		if (*dst != '\0' && *dst != '.')
+		if (*dst != '-' && *dst != '.')
 			dst+= _height;
 	}
 
-	return r;
+	while (dst < &result->_data[_width * _height])
+		*dst++ = '.';
+
+	return result;
 }

@@ -6,13 +6,14 @@
 #include "area.h"
 
 class state {
-public:
 	state* _parent;
-	board* _board;
+	const board* _board;
 	point _click;
 
+public:
 	state();
-	state(state* parent, board* board, area& click);
+	state(const board* board);
+	state(state* parent, const board* board, area& click);
 	void click(const area& a);
 	void click(point click);
 
@@ -20,8 +21,9 @@ public:
 		return _board->areas()->size() < other._board->areas()->size();
 	}
 
-private:
-	void update();
+	inline const state* parent() const { return _parent; }
+	inline const board* board() const { return _board; }
+	inline const point click() const { return _click;  }
 };
 
 #endif

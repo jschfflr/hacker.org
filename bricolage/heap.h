@@ -5,12 +5,15 @@
 
 template<class T>
 class heap {
-	T tmp;
 	T* _heap;
 	size_t _size;
 	size_t _capacity;
 
 public:
+	heap() {
+		_size = _capacity = _heap = 0;
+	}
+
 	heap(size_t capacity) {
 		_size = 0;
 		_capacity = capacity;
@@ -29,7 +32,10 @@ public:
 		decrease(i);
 	}
 
-	void remove(size_t i, T& item) {
+	bool remove(size_t i, T& item) {
+		if (i >= _size)
+			return false;
+
 		item = _heap[i];
 		swap(i, --_size);
 		if (i != _size) {
@@ -38,10 +44,18 @@ public:
 			else
 				decrease(i);
 		}
+
+		return true;
 	}
 
-	void pop(T& item) {
+	bool pop(T& item) {
 		return remove(0, item);
+	}
+
+	inline T& operator [](size_t i) const {
+		if (i >= _size)
+			throw std::runtime_error("Heap Index out of range");
+		return _heap[i];
 	}
 
 	inline size_t size() const { return _size; }

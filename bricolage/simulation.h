@@ -3,31 +3,30 @@
 
 #include "common.h"
 
+#include <list>
 #include <thread>
 #include "state.h"
 #include "mutex.h"
-#include "stack.h"
 #include "heap.h"
 
-class Simulation {
+class simulation {
 private:
-	mutex stack_lock;
+	mutex heap_lock;
 	heap<state*> heap;
-	std::list<std::pair<int, int>> path;
 	std::list<std::thread> threads;
 
+	size_t samples;
+	size_t possibilities;
+	const state* result;
 	volatile bool running;
-	unsigned long long samples;
-	unsigned long long possibilities;
-	static void thread(Simulation* pContext);
-
-	void resolve(std::list<std::pair<int, int>>);
+	void thread();
+	void resolve(const state* state);
+	static void thread_wrapper(simulation* pContext);
 
 public:
-	Simulation(Board& board);
-	Simulation::~Simulation();
-	std::list<std::pair<int,int>> run();
-	std::list<Board> run(Board& b, std::list<std::pair<int,int>> path);
+	simulation(const board& board);
+	~simulation();
+	void run(std::string& path);
 };
 
 

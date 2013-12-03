@@ -17,16 +17,26 @@ struct point {
 };
 
 struct area {
-	char color;
+	char _color;
 	std::vector<point> points;
 
+	area() {
+		_color = -1;
+	}
+
 	area(char color) {
-		this->color = color;
+		_color = color;
 	}
 
 	int size() {
 		return points.size();
 	}
+
+	inline bool operator <(const area& other) const {
+		return points.size() < other.points.size();
+	}
+
+	inline char color() const { return _color; }
 };
 
 #endif
