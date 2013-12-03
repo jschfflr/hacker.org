@@ -3,69 +3,88 @@
 #include "stack.h"
 
 
-Board::Board() {
+board::board() {
 	_width = _height = 0;
-	data = 0;
+	_data = 0;
+	_areas = 0;
 }
 
-Board::Board(int width, int height, std::string board) {
-	this->_width = width;
-	this->_height = height;
-	this->data = new char[width * height + 1];
-	memcpy(this->data, board.data(), width * height);
-	this->data[width * height] = '\0';
+board::board(int width, int height, const char* board) {
+	_width = width;
+	_height = height;
+	_data = new char[width * height];
+	_areas = new heap<area>(width * height);
+	if (board) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				//convert from rows to cols for performance reason
+				_data[y + x * height] = board[x + y * width];
+			}
+		}
+		areas(*_areas);
+	}
 }
 
-Board::Board(const Board& board) {
+board::board(const board& board) {
+	_width = board._width;
+	_height = board._height;
+	_data = new char[board._width * board._height];
+	memcpy(_data, board._data, board._width * board._height);
+	if (board._areas)
+		_areas = new heap<area>(board._areas->size());
+	else {
+		_areas = new heap<area>(_width * _height);
+		areas(*_areas);
+	}
+}
+
+board& board::operator =(const board& board) {
 	this->_width = board._width;
 	this->_height = board._height;
-	//if (this->data) delete[] this->data;
-	this->data = new char[board._width * board._height + 1];
-	memcpy(this->data, board.data, board._width * board._height);
-	this->data[board._width * board._height] = '\0';
-
-	this->_areas = board._areas;
-}
-
-Board& Board::operator =(const Board& board) {
-	this->_width = board._width;
-	this->_height = board._height;
-	if (this->data) delete[] this->data;
-	this->data = new char[board._width * board._height + 1];
-	memcpy(this->data, board.data, board._width * board._height);
-	this->data[board._width * board._height] = '\0';
+	if (this->_data) delete[] this->_data;
+	this->_data = new char[board._width * board._height];
+	memcpy(this->_data, board._data, board._width * board._height);
 	
-	this->_areas = board._areas;
-
+	if (this->_areas) delete[] this->_areas;
+	if (board._areas)
+		this->_areas = new heap<area>(board._areas->size());
+	else {
+		_areas = new heap<area>(_width * _height);
+		areas(*_areas);
+	}
+	
 	return *this;
 }
 
-Board::~Board() {
-	if( this->data )
-		delete [] this->data;
+board::~board() {
+	if( this->_data )
+		delete [] this->_data;
 
-	this->data = 0;
+	this->_data = 0;
+
+	if (this->_areas)
+		delete[] this->_areas;
+
+	this->_areas = 0;
 }
 
-/*
-char Board::get(int x, int y) const {
+char board::get(int x, int y) const {
 	if( !(0 <= x && x < _width) ||
 		!(0 <= y && y < _height) )
-		throw new std::range_error("Board Index out of Range");
+		throw new std::range_error("board Index out of Range");
 
-	return data[x + y * _width];
+	return _data[y + x * _height];
 }
-*/
 
-void Board::set(int x, int y, char c) {
+void board::set(int x, int y, char c) {
 	if( !(0 <= x && x < _width) ||
 		!(0 <= y && y < _height) )
-		throw new std::range_error("Board Index out of Range");
+		throw new std::range_error("board Index out of Range");
 		
-	data[x + y * _width] = c;
+	_data[y + x * _height] = c;
 }
 
-std::string Board::debug() {
+std::string board::debug() {
 	std::string output = "";
 	for(int y = _height - 1; y >= 0; y--) {
 		for(int x = 0; x < _width; x++) {
@@ -79,11 +98,11 @@ std::string Board::debug() {
 	return output;
 }
 
-Board::operator std::string() {
+board::operator std::string() {
 	return debug();
 }
 
-bool Board::empty() {
+bool board::empty() {
 	for(int y = 0; y < _height; y++) {
 		for(int x = 0; x < _width; x++) {
 			if( get(x, y) != '.')
@@ -94,51 +113,49 @@ bool Board::empty() {
 }
 
 // Get all areas in the current field
-std::list<Area> Board::areas() {
-	::stack<std::pair<int,int>> stack(_width * _height);
-	std::list<Area> areas;
+void board::areas(heap<area>& areas) {
+	::stack<point> stack(_width * _height);
 	char* tmp = new char[_width * _height];
-	memcpy(tmp, data, _width * _height);
+	memcpy(tmp, _data, _width * _height);
 
 	char color;
 	for(int y = 0; y < _height; y++) {
 		for(int x = 0; x < _width; x++) {
 
-			color = tmp[x + y * _width];
+			color = get(x, y);
 			if( color == 0 || color == '.' )
 				continue;
 
-			Area area(color);
-			stack.push(std::pair<int,int>(x, y));
+			area area(color);
+			stack.push(point(x, y));
 
 			while(stack.size()) {
 				auto c = stack.top();
 				stack.pop();
 
-				if( !(0 <= c.first && c.first < _width) ||
-					!(0 <= c.second && c.second < _height) )
+				if( !(0 <= c.x && c.x < _width) ||
+					!(0 <= c.y && c.y < _height) )
 					continue; // Out of range
 
-				if( tmp[c.first + c.second * _width] != color )
+				if( tmp[c.y + c.x * _height] != color )
 					continue;
 
-				tmp[c.first + c.second * _width] = 0;
+				tmp[c.y + c.x * _height] = 0;
 				area.points.push_back(c);
 				
-				stack.push(std::pair<int,int>(c.first, c.second+1));
-				stack.push(std::pair<int,int>(c.first, c.second-1));
-				stack.push(std::pair<int,int>(c.first+1, c.second));
-				stack.push(std::pair<int,int>(c.first-1, c.second));
+				stack.push(point(c.x, c.y  +1));
+				stack.push(point(c.x, c.y - 1));
+				stack.push(point(c.x + 1, c.y));
+				stack.push(point(c.x - 1, c.y));
 			}
 
-			areas.push_back( area );
+			areas.insert( area );
 		}
 	}
 	delete[] tmp;
-	return areas;
 }
 
-std::string Board::serialize() {
+std::string board::serialize() {
 	std::string tmp = "";
 	for(int y = 0; y < _height; y++) {
 		for(int x = 0; x < _width; x++) {
@@ -148,10 +165,37 @@ std::string Board::serialize() {
 	return tmp;
 }
 
-Board Board::Load(std::string src) {
-	int _width = 0;
-	int _height = 0;
-	char* data = 0;
+board* board::click(area& area) {
+	//initialise a new board with same dimensions
+	board* r = new board(_width, _height, _data);
 
-	throw std::runtime_error("Not Implemented Yet");
+	// remove all fields that are part of the area
+	// marking them with \0
+	for (auto it = area.points.begin(); it != area.points.end(); it++) {
+		r->set(it->x, it->y, '\0');
+	}
+	
+
+	//loop through all cols
+	for (int x = h.x; x < h.y; x++) {
+		// if we find a cleared cell
+		char *src, *dst;
+		for (src = dst = &_data[x * _height]; src < &_data[(x + 1) * _height]; src++) {
+			*dst = *src;
+			if (*dst != '\0' && *dst != '.' )
+				dst++;
+		}
+		
+		memset(dst, '.', (int)&_data[(x + 1) * _height - (int)dst);
+	}
+
+	char *src, *dst;
+	for (src = dst = _data; src < &_data[_width * _height]; src += _height) {
+		if (src != dst)
+			memcpy(dst, src, _height);
+		if (*dst != '\0' && *dst != '.')
+			dst+= _height;
+	}
+
+	return r;
 }

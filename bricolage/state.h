@@ -3,21 +3,21 @@
 
 #include "common.h"
 #include "board.h"
+#include "area.h"
 
 class state {
 public:
-	Board board;
-	std::list<std::pair<int,int>> clicks;
+	state* _parent;
+	board* _board;
+	point _click;
 
 	state();
-	state(Board board);
-	void click(Area &a);
-	void click(std::pair<int,int> click);
-
-	std::string path() const ;
+	state(state* parent, board* board, area& click);
+	void click(const area& a);
+	void click(point click);
 
 	inline bool operator <(const state& other) const {
-		return board._areas.size() < other.board._areas.size();
+		return _board->areas()->size() < other._board->areas()->size();
 	}
 
 private:

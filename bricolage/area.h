@@ -1,13 +1,26 @@
 #ifndef __AREA_H__
 #define __AREA_H__
 
-#include <list>
+#include <vector>
 
-struct Area {
+struct point {
+	int x, y;
+
+	point() {
+		x = y = 0;
+	}
+
+	point(int x, int y) {
+		this->x = x;
+		this->y = y;
+	}
+};
+
+struct area {
 	char color;
-	std::list<std::pair<int,int>> points;
+	std::vector<point> points;
 
-	Area(char color) {
+	area(char color) {
 		this->color = color;
 	}
 

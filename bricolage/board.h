@@ -5,34 +5,23 @@
 
 #include <string>
 #include "area.h"
+#include "heap.h"
 
-class Board{
-public:
-	enum {
-		EMPTY = '.',
-	};
-
+class board{
 private:
 	int _width;
 	int _height;
-	char* data;
+	char* _data;
+	heap<area>* _areas;
 
 public:
-	std::list<Area> _areas;
+	board();
+	~board();
+	board(const board& board);
+	board(int width, int height, const char* board);
+	board& operator=(const board& );
 
-	Board();
-	~Board();
-	Board::Board(const Board& board);
-	Board(int width, int height, std::string board);
-	Board& operator=(const Board& );
-
-	inline char get(int x, int y) const {
-		if( !(0 <= x && x < _width) ||
-			!(0 <= y && y < _height) )
-			throw new std::range_error("Board Index out of Range");
-
-		return data[x + y * _width];	
-	};
+	char get(int x, int y) const;
 	void set(int x, int y, char c);
 
 	std::string debug();
@@ -40,13 +29,14 @@ public:
 	bool empty();
 
 	// Get all areas in the current field
-	std::list<Area> areas();
+	void areas(heap<area>& areas);
 	std::string serialize();
 
 	inline int width() const { return _width; }
 	inline int height() const { return _height; }
+	inline heap<area>* areas() const { return _areas; }
 
-	static Board Load(std::string src);
+	board* click(area& click);
 };
 
 
