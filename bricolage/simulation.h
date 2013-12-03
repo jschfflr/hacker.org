@@ -22,11 +22,15 @@ private:
 	void thread();
 	void resolve(const state* state);
 	static void thread_wrapper(simulation* pContext);
+	void depth_first_search(state* initial);
+	static void dfs_wrapper(simulation* self, state* initial);
+	
 
 public:
 	simulation(const board& board);
 	~simulation();
 	void run(std::string& path);
+	void dfs(std::string& path);
 };
 
 

@@ -56,7 +56,7 @@ void app::parse(std::string data, int& level, int& width, int& height, std::stri
 bool app::solve(const board& board, std::string& path) {
 	simulation s(board);
 	try {
-		s.run(path);
+		s.dfs(path);
 		return true;
 	}
 	catch (std::exception e) {

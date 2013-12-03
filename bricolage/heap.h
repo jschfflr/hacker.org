@@ -33,11 +33,11 @@ public:
 		decrease(i);
 	}
 
-	bool remove(size_t i, T& item) {
+	bool remove(size_t i, T* item) {
 		if (i >= _size)
 			return false;
 
-		item = _heap[i];
+		*item = _heap[i];
 		swap(i, --_size);
 		if (i != _size) {
 			if (i == 0 || _heap[i] < _heap[parent(i)])
@@ -49,7 +49,7 @@ public:
 		return true;
 	}
 
-	bool pop(T& item) {
+	bool pop(T* item) {
 		return remove(0, item);
 	}
 

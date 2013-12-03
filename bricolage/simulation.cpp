@@ -9,7 +9,7 @@
 #include "monitor.h"
 
 
-#include <stack>
+#include "stack.h"
 
 simulation::simulation(const board& board):
 	heap(board.width() * board.height() * 10000){
@@ -45,6 +45,60 @@ void simulation::thread_wrapper(simulation* self) {
 	}
 }
 
+void simulation::dfs_wrapper(simulation* self, state* initial) {
+	self->depth_first_search(initial);
+}
+
+void simulation::dfs(std::string& path) {
+
+	area a;
+	timer t;
+	state* s;
+	
+	heap.pop(&s);
+	running = true;
+	while (s->board()->areas()->pop(&a)) {
+		state *p = new state(s, a);
+		threads.push_back(std::thread(dfs_wrapper, this, p));
+	}
+
+	for (auto it = threads.begin(); it != threads.end(); it++)
+		it->join();
+
+	monitor::_emit(monitor::event("samples") << samples << t.get());
+	monitor::_emit(monitor::event("possibilities") << possibilities << t.get());
+
+	std::stringstream result;
+	const state* p = this->result;
+	result << std::hex << std::setfill('0');
+
+	while (p->parent()) {
+		result << std::setw(2) << static_cast<unsigned>(p->click().x);
+		result << std::setw(2) << static_cast<unsigned>(p->click().y);
+		p = p->parent();
+		path = result.str();
+	}
+}
+
+void simulation::depth_first_search(state* initial) {
+	::stack<state*> stack( initial->board()->width() * initial->board()->height() );
+	stack.push(initial);
+	state* s;
+	while( running && (s = stack.top()) ) {
+		if (s->board()->empty())
+			return resolve(s);
+
+		area a;
+		if( s->board()->areas()->pop(&a) ) {
+			state* p = new state(s, a);
+			stack.push(p);
+			continue;
+		}
+
+		stack.pop();
+	}
+}
+
 void simulation::thread() {
 	state* state;
 	while (running) {
@@ -57,7 +111,7 @@ void simulation::thread() {
 			continue;
 		}
 		else {
-			heap.pop(state);
+			heap.pop(&state);
 			samples++;
 			possibilities += state->board()->areas()->size();
 			heap_lock.unlock();
@@ -68,13 +122,13 @@ void simulation::thread() {
 		}
 
 		area area;
-		while (state->board()->areas()->pop(area)) {
+		while (state->board()->areas()->pop(&area)) {
 			// Can not click this area
 			if (area.size() < 3)
 				continue;
 
 			// perform click
-			::state *p = new ::state(state, state->board(), area);
+			::state *p = new ::state(state, area);
 			
 			if (p->board()->empty()) {
 				return resolve(p);

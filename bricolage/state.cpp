@@ -12,9 +12,9 @@ state::state(const ::board* board) {
 	_click = point(-1, -1);
 }
 
-state::state(state* parent, const ::board* board, area& click) {
+state::state(state* parent, area& click) {
 	_click = click.points[0];
 	_parent = parent;
-	_board = board->click(click);
+	_board = parent->board()->click(click);
 }
 

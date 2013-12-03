@@ -13,7 +13,7 @@ class state {
 public:
 	state();
 	state(const board* board);
-	state(state* parent, const board* board, area& click);
+	state(state* parent, area& click);
 	void click(const area& a);
 	void click(point click);
 
