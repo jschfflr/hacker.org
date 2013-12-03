@@ -28,6 +28,10 @@ struct area {
 		_color = color;
 	}
 
+	~area() {
+
+	}
+
 	int size() {
 		return points.size();
 	}

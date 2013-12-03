@@ -17,7 +17,7 @@ private:
 public:
 	board();
 	~board();
-	board(const board& board);
+	board(const board& board, bool calculate = true);
 	board(int width, int height, const char* board);
 	board& operator=(const board& );
 

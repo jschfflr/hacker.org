@@ -12,7 +12,7 @@
 #include <stack>
 
 simulation::simulation(const board& board):
-	heap(4096){
+	heap(board.width() * board.height() * 10000){
 	samples = 0;
 	possibilities = 0;
 
@@ -36,13 +36,13 @@ void simulation::resolve(const state* state) {
 }
 
 void simulation::thread_wrapper(simulation* self) {
-	//try {
+	try {
 		self->thread();
-	//}
-	//catch (std::exception e) {
-	//	monitor::_emit(monitor::event("exception") << "thread" << e.what());
-	//	terminate();
-	//}
+	}
+	catch (std::exception e) {
+		monitor::_emit(monitor::event("exception") << "thread" << e.what());
+		terminate();
+	}
 }
 
 void simulation::thread() {
@@ -63,10 +63,7 @@ void simulation::thread() {
 			heap_lock.unlock();
 		}
 
-		std::cout << state->board()->debug() << std::endl;
-
 		if (state->board()->areas()->size() == 0 && !state->board()->empty()) {
-			delete state; //No more moves here
 			continue; // 
 		}
 
@@ -78,7 +75,6 @@ void simulation::thread() {
 
 			// perform click
 			::state *p = new ::state(state, state->board(), area);
-			std::cout << area.points[0].x << " " << area.points[0].y << std::endl;
 			
 			if (p->board()->empty()) {
 				return resolve(p);
@@ -89,15 +85,13 @@ void simulation::thread() {
 				heap_lock.unlock();
 			}
 		}
-
-		delete state;
 	}
 }
 
 void simulation::run(std::string& path) {
 	running = true;
 	timer t;
-	for (unsigned int i = 0; i < std::thread::hardware_concurrency(); i++)
+	for (unsigned int i = 0; i < 1 /* std::thread::hardware_concurrency() */; i++)
 		threads.push_back(std::thread(thread_wrapper, this));
 
 	for (auto it = threads.begin(); it != threads.end(); it++)
@@ -110,12 +104,12 @@ void simulation::run(std::string& path) {
 	const state* p = this->result;
 	result << std::hex << std::setfill('0');
 
-	while (p = p->parent() ) {
+	while (p->parent()) {
 		result << std::setw(2) << static_cast<unsigned>(p->click().x);
 		result << std::setw(2) << static_cast<unsigned>(p->click().y);
+		p = p->parent();
+		path = result.str();
 	}
-
-	path = result.str();
 }
 
 #if 0

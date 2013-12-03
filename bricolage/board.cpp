@@ -26,17 +26,15 @@ board::board(int width, int height, const char* board) {
 	}
 }
 
-board::board(const board& board) {
+board::board(const board& board, bool calculate) {
 	_width = board._width;
 	_height = board._height;
 	_data = new char[board._width * board._height];
 	memcpy(_data, board._data, board._width * board._height);
-	if (board._areas)
-		_areas = new heap<area>(board._areas->size());
-	else {
-		_areas = new heap<area>(_width * _height);
+	_areas = new heap<area>(_width * _height);
+	
+	if (calculate)
 		areas(*_areas);
-	}
 }
 
 board& board::operator =(const board& board) {
@@ -64,7 +62,7 @@ board::~board() {
 	this->_data = 0;
 
 	if (this->_areas)
-		delete[] this->_areas;
+		delete this->_areas;
 
 	this->_areas = 0;
 }
@@ -169,7 +167,7 @@ std::string board::serialize() {
 
 board* board::click(area& area) const {
 	//initialise a new board with same dimensions
-	board* result = new board(*this);
+	board* result = new board(*this, false);
 
 	int left = _width, right = 0;
 	// remove all fields that are part of the area
@@ -210,5 +208,6 @@ board* board::click(area& area) const {
 	while (dst < &result->_data[_width * _height])
 		*dst++ = '.';
 
+	result->areas(*result->_areas);
 	return result;
 }

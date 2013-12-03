@@ -11,7 +11,8 @@ class heap {
 
 public:
 	heap() {
-		_size = _capacity = _heap = 0;
+		_size = _capacity = 0;
+		_heap = 0;
 	}
 
 	heap(size_t capacity) {
@@ -59,6 +60,7 @@ public:
 	}
 
 	inline size_t size() const { return _size; }
+	inline size_t capacity() const { return _capacity; }
 	inline bool empty() const { return _size == 0; }
 private:
 	inline void swap(int a, int b) {
