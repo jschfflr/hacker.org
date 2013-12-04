@@ -10,6 +10,7 @@
 #include "monitor.h"
 
 
+#include "graph.h"
 #include "stack.h"
 
 simulation::simulation(const board& board) {
@@ -56,10 +57,7 @@ void simulation::resolve(const state* state) {
 
 void simulation::dfs_wrapper(simulation* self, state* initial) {
 	try {
-		timer t;
-		monitor::_emit(monitor::event("thread") << "started" << std::this_thread::get_id());
 		self->depth_first_search(initial);
-		monitor::_emit(monitor::event("thread") << "finished" << std::this_thread::get_id() << t.millis());
 	}
 	catch (std::exception e) {
 		monitor::_emit(monitor::event("exception") << "thread" << e.what());
@@ -88,6 +86,7 @@ void simulation::depth_first_search(state* initial) {
 				
 
 			state* p = new state(s, *a);
+			graph::_emit(s, p);
 			stack.push(p);
 			delete a;
 			continue;
@@ -113,8 +112,9 @@ void simulation::dfs(std::string* path) {
 			continue;
 		}
 			
-
-		threads.push_back(std::thread(dfs_wrapper, this, new state(initial, *a)));
+		state* s = new state(initial, *a);
+		graph::_emit(initial, s);
+		threads.push_back(std::thread(dfs_wrapper, this, s));
 		delete a;
 	}
 

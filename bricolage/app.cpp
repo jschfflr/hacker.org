@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 #include "app.h"
+#include "graph.h"
 #include "monitor.h"
 #include "request.h"
 #include "simulation.h"
@@ -92,12 +93,17 @@ void app::run() {
 		//parseline(levels, width, height, data);
 
 		parse(data, &level, &width, &height, &data);
-		timer t;
-
 		
+		char buffer[512];
+		sprintf_s(buffer, sizeof(buffer), "output/level%02d.graph", level);
+		graph* g = graph::create(buffer);
+
+		timer t;
 		solve(board(width, height, data.c_str()), &path);
 		
 		monitor::_emit(monitor::event("solved") << level++ << int(t.get() * 1000) << path);
+
+		g->release();
 
 		sprintf_s(url, sizeof(url), "/brick/index.php?name=%s&password=%s&path=%s", username, password, path.c_str());
 		data = request("www.hacker.org", url);

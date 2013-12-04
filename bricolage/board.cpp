@@ -87,15 +87,17 @@ void board::set(const point& p, char c) {
 }
 
 std::string board::debug() const {
-	std::string output = "";
+	std::string output = "\"";
 	for(int y = _height - 1; y >= 0; y--) {
 		for(int x = 0; x < _width; x++) {
-			output += ' ';
+			//output += ' ';
 			output += get(x, y);
 			output += ' ';
 		}
-		output += '\n';
+		output += "\\n";
 	}
+
+	output += "\"";
 
 	return output;
 }
@@ -116,7 +118,7 @@ bool board::empty() const {
 
 void board::floodfill(point point, area* area, char* data, void(*cb)(const ::point&, void*), void* param) {
 	char* tmp;
-	stack<::point> stack(_width * _height);
+	stack<::point> stack(_width * _height << 2);
 	char color = get( point );
 	stack.push(point);
 
@@ -199,8 +201,8 @@ struct tmp {
 static void clear(const point& p, void* param) {
 	tmp* t = (tmp*)param;
 	t->left = std::min(t->left, p.x);
-	t->right = std::max(t->right, p.x);
-	t->board->set(p, '-');
+	t->right = std::max(t->right, p.x + 1);
+	t->board->set(p, '.');
 }
 
 board* board::click(area& area) const {

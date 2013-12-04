@@ -15,6 +15,7 @@ public:
 		_size = size;
 		_stack = new T[size];
 	}
+
 	~stack() {
 		delete[] _stack;
 	}

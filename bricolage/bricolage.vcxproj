@@ -171,6 +171,7 @@
     <ClCompile Include="app.cpp" />
     <ClCompile Include="board.cpp" />
     <ClCompile Include="bricolage.cpp" />
+    <ClCompile Include="graph.cpp" />
     <ClCompile Include="monitor.cpp" />
     <ClCompile Include="mutex.cpp" />
     <ClCompile Include="object.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="area.h" />
     <ClInclude Include="board.h" />
     <ClInclude Include="common.h" />
+    <ClInclude Include="graph.h" />
     <ClInclude Include="heap.h" />
     <ClInclude Include="monitor.h" />
     <ClInclude Include="mutex.h" />
