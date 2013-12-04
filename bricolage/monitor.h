@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 
+#include "common.h"
 #include "timer.h"
 #include "mutex.h"
 
@@ -43,6 +44,7 @@ public:
 	~monitor();
 
 	void emit(const event&);
+	void release();
 
 	static void _emit(const event&);
 	static monitor* create(std::string filename);

@@ -70,5 +70,5 @@ StatsManager& StatsManager::Get() {
 	return StatsManager::instance;
 }
 
-StatsManager& StatsManager::instance = StatsManager();
+StatsManager& StatsManager::instance = 0;
 

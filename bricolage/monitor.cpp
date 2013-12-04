@@ -24,6 +24,10 @@ void monitor::emit(const event& event) {
 	mutex.release();
 }
 
+void monitor::release() {
+	delete this;
+}
+
 void monitor::_emit(const event& event) {
 	instance->emit(event);
 }

@@ -6,12 +6,8 @@
 std::string request(std::string host, std::string url, std::string* session) {
 	struct sockaddr_in server;
 	struct hostent *host_info;
-	int sock;
+	SOCKET sock;
 	
-	WSAData data;
-	if( WSAStartup(MAKEWORD(2,0), &data) != 0 )
-		throw std::runtime_error("WSAStartUp failed.");
-
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if( sock == INVALID_SOCKET )
 		throw std::runtime_error("Socket Creation failed.");

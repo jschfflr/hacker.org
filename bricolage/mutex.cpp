@@ -6,6 +6,7 @@ mutex::mutex() {
 }
 
 void mutex::lock() {
+#ifndef _WIN64
 	__asm {
 _loop:
 		mov eax, 0
@@ -14,6 +15,9 @@ _loop:
 		lock cmpxchg [ecx]._lock, ebx
 		JNZ _loop
 	}
+#else
+	_lock = 1; //TODO: How to do this with x64
+#endif
 }
 
 void mutex::release() {

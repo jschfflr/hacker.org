@@ -4,14 +4,18 @@
 #include "monitor.h"
 #include <iostream>
 
-int main(int argc, const char* argv[]) {
 #if _DEBUG
-	std::string version = "multithreaded,custommutex,customstack,customheap,debug";
+	const char* version = "multithreaded,custommutex,customstack,customheap,debug";
 #else
-	std::string version = "multithreaded,custommutex,customstack,customheap,release";
+	const char* version = "multithreaded,custommutex,customstack,customheap,release";
 #endif
-	
-	monitor::create("events.log");
+
+int main(int argc, const char* argv[]) {	
+	WSAData data;
+	if (WSAStartup(MAKEWORD(2, 0), &data) != 0)
+		throw std::runtime_error("WSAStartUp failed.");
+
+	monitor* m = monitor::create("events.log");
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	try {
@@ -22,7 +26,10 @@ int main(int argc, const char* argv[]) {
 		return -1;
 	}
 
-	//_CrtDumpMemoryLeaks();
+
+	m->release();
+	WSACleanup();
+	_CrtDumpMemoryLeaks();
 
 	return 0;
 }

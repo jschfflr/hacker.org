@@ -28,7 +28,7 @@ public:
 	void insert(const T& element) {
 		if (_size == _capacity)
 			throw std::runtime_error("Heap is full");
-		int i = _size++;
+		size_t i = _size++;
 		_heap[i] = element;
 		decrease(i);
 	}
@@ -53,7 +53,7 @@ public:
 		return remove(0, item);
 	}
 
-	inline T& operator [](size_t i) const {
+	inline T& get(size_t i) const {
 		if (i >= _size)
 			throw std::runtime_error("Heap Index out of range");
 		return _heap[i];
@@ -63,7 +63,7 @@ public:
 	inline size_t capacity() const { return _capacity; }
 	inline bool empty() const { return _size == 0; }
 private:
-	inline void swap(int a, int b) {
+	inline void swap(size_t a, size_t b) {
 		std::swap(_heap[a], _heap[b]);
 		//return;
 		//memcpy(&tmp, &_heap[a], sizeof(T));
@@ -71,17 +71,17 @@ private:
 		//memcpy(&_heap[b], &tmp, sizeof(T));
 	}
 
-	inline void decrease(int i) {
+	inline void decrease(size_t i) {
 		while (i > 0 && _heap[i] < _heap[parent(i)]) {
 			swap(i, parent(i));
 			i = parent(i);
 		}
 	}
 
-	inline void heapify(int a) {
-		int i = a;
+	inline void heapify(size_t a) {
+		size_t i = a;
 		do {
-			int min = i;
+			size_t min = i;
 			if (left(i) < _size && _heap[left(i)] < _heap[min])
 				min = left(i);
 			if (right(i) < _size && _heap[right(i)] < _heap[min])
@@ -93,9 +93,9 @@ private:
 		} while (true);
 	}
 
-	inline size_t parent(int i) const { return i / 2; }
-	inline size_t left(int i) const { return 2 * i; }
-	inline size_t right(int i) const { return 2 * i + 1; }
+	inline size_t parent(size_t i) const { return i / 2; }
+	inline size_t left(size_t i) const { return 2 * i; }
+	inline size_t right(size_t i) const { return 2 * i + 1; }
 
 };
 

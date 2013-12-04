@@ -1,8 +1,6 @@
 #ifndef __AREA_H__
 #define __AREA_H__
 
-#include <vector>
-
 struct point {
 	int x, y;
 
@@ -16,31 +14,36 @@ struct point {
 	}
 };
 
+class board;
+
 struct area {
+	friend class board;
 	char _color;
-	std::vector<point> points;
+	point _point;
+	size_t _size;
 
 	area() {
 		_color = -1;
 	}
 
-	area(char color) {
+	area(char color, point point = ::point(-1, -1), int size = 0) {
 		_color = color;
+		_point = point;
+		_size = size;
 	}
 
 	~area() {
 
 	}
 
-	int size() {
-		return points.size();
-	}
 
 	inline bool operator <(const area& other) const {
-		return points.size() < other.points.size();
+		return _size < other._size;
 	}
 
+	inline size_t size() const {return _size;}
 	inline char color() const { return _color; }
+	inline const point& point() const { return _point; }
 };
 
 #endif

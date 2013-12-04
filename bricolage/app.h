@@ -6,7 +6,7 @@
 
 class app {
 	int level;
-	const char* user;
+	const char* username;
 	const char* password;
 
 	const std::regex r_width = std::regex("x=(\\d+)");
@@ -17,8 +17,8 @@ class app {
 	const std::regex r_level = std::regex("Level: (\\d+)");
 
 private:
-	bool solve(const board& board, std::string& path);
-	void parse(std::string data, int& level, int& width, int& height, std::string& board) const;
+	bool solve(const board& board, std::string* path);
+	void parse(std::string& data, int* level, int* width, int* height, std::string* board) const;
 	void parseline(std::fstream& file, int& width, int& height, std::string& data) const;
 	
 

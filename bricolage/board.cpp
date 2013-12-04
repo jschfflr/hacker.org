@@ -14,7 +14,7 @@ board::board(int width, int height, const char* board) {
 	_width = width;
 	_height = height;
 	_data = new char[width * height];
-	_areas = new heap<area>(width * height);
+	_areas = new heap<area*>(width * height / 2);
 	if (board) {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -22,7 +22,7 @@ board::board(int width, int height, const char* board) {
 				_data[y + x * height] = board[x + y * width];
 			}
 		}
-		areas(*_areas);
+		update();
 	}
 }
 
@@ -31,28 +31,10 @@ board::board(const board& board, bool calculate) {
 	_height = board._height;
 	_data = new char[board._width * board._height];
 	memcpy(_data, board._data, board._width * board._height);
-	_areas = new heap<area>(_width * _height);
+	_areas = new heap<area*>(_width * _height / 2);
 	
 	if (calculate)
-		areas(*_areas);
-}
-
-board& board::operator =(const board& board) {
-	this->_width = board._width;
-	this->_height = board._height;
-	if (this->_data) delete[] this->_data;
-	this->_data = new char[board._width * board._height];
-	memcpy(this->_data, board._data, board._width * board._height);
-	
-	if (this->_areas) delete[] this->_areas;
-	if (board._areas)
-		this->_areas = new heap<area>(board._areas->size());
-	else {
-		_areas = new heap<area>(_width * _height);
-		areas(*_areas);
-	}
-	
-	return *this;
+		update();
 }
 
 board::~board() {
@@ -61,8 +43,13 @@ board::~board() {
 
 	this->_data = 0;
 
-	if (this->_areas)
-		delete this->_areas;
+	if (this->_areas) {
+		for (size_t i = 0; i < _areas->size(); i++)
+			delete this->_areas->get(i);
+
+		delete _areas;
+	}
+		
 
 	this->_areas = 0;
 }
@@ -75,12 +62,28 @@ char board::get(int x, int y) const {
 	return _data[y + x * _height];
 }
 
+char board::get(const point& p) const {
+	if (!(0 <= p.x && p.x < _width) ||
+		!(0 <= p.y && p.y < _height))
+		throw new std::range_error("board Index out of Range");
+
+	return _data[p.y + p.x * _height];
+}
+
 void board::set(int x, int y, char c) {
 	if( !(0 <= x && x < _width) ||
 		!(0 <= y && y < _height) )
 		throw new std::range_error("board Index out of Range");
 		
 	_data[y + x * _height] = c;
+}
+
+void board::set(const point& p, char c) {
+	if (!(0 <= p.x && p.x < _width) ||
+		!(0 <= p.y && p.y < _height))
+		throw new std::range_error("board Index out of Range");
+
+	_data[p.y + p.x * _height] = c;
 }
 
 std::string board::debug() const {
@@ -111,13 +114,51 @@ bool board::empty() const {
 	return true;
 }
 
+void board::floodfill(point point, area* area, char* data, void(*cb)(const ::point&, void*), void* param) {
+	char* tmp;
+	stack<::point> stack(_width * _height);
+	char color = get( point );
+	stack.push(point);
+
+	if (!data) {
+		tmp = new char[_width * _height];
+		memcpy(tmp, _data, _width * _height);
+	}
+	else
+		tmp = data;
+
+	::point p;
+	while (stack.pop(&p)) {
+		if (!(0 <= p.x && p.x < _width) ||
+			!(0 <= p.y && p.y < _height))
+			continue; // Out of range
+
+		if (tmp[p.y + p.x * _height] != color)
+			continue;
+
+		tmp[p.y + p.x * _height] = 0;
+		area->_size++;
+		if (cb)
+			cb(p, param);
+
+		stack.push(::point(p.x, p.y + 1));
+		stack.push(::point(p.x, p.y - 1));
+		stack.push(::point(p.x + 1, p.y));
+		stack.push(::point(p.x - 1, p.y));
+	}
+
+	if (!data)
+		delete[] tmp;
+}
+
 // Get all areas in the current field
-void board::areas(heap<area>& areas) {
+void board::update() {
 	::stack<point> stack(_width * _height);
 	char* tmp = new char[_width * _height];
 	memcpy(tmp, _data, _width * _height);
 
 	char color;
+	point c;
 	for(int y = 0; y < _height; y++) {
 		for(int x = 0; x < _width; x++) {
 
@@ -125,31 +166,15 @@ void board::areas(heap<area>& areas) {
 			if( color == 0 || color == '.' )
 				continue;
 
-			area area(color);
-			stack.push(point(x, y));
+			point p(x, y);
+			area* area = new ::area(color, p);
+			
+			floodfill(p, area, tmp);
 
-			while(stack.size()) {
-				auto c = stack.top();
-				stack.pop();
-
-				if( !(0 <= c.x && c.x < _width) ||
-					!(0 <= c.y && c.y < _height) )
-					continue; // Out of range
-
-				if( tmp[c.y + c.x * _height] != color )
-					continue;
-
-				tmp[c.y + c.x * _height] = 0;
-				area.points.push_back(c);
-				
-				stack.push(point(c.x, c.y  +1));
-				stack.push(point(c.x, c.y - 1));
-				stack.push(point(c.x + 1, c.y));
-				stack.push(point(c.x - 1, c.y));
-			}
-
-			if (area.size())
-				areas.insert( area );
+			if (area->size())
+				_areas->insert(area);
+			else
+				delete area;
 		}
 	}
 	delete[] tmp;
@@ -165,22 +190,30 @@ std::string board::serialize() {
 	return tmp;
 }
 
+struct tmp {
+	int left;
+	int right;
+	board* board;
+};
+
+static void clear(const point& p, void* param) {
+	tmp* t = (tmp*)param;
+	t->left = std::min(t->left, p.x);
+	t->right = std::max(t->right, p.x);
+	t->board->set(p, '-');
+}
+
 board* board::click(area& area) const {
 	//initialise a new board with same dimensions
 	board* result = new board(*this, false);
 
-	int left = _width, right = 0;
 	// remove all fields that are part of the area
 	// marking them with \0
-	for (auto it = area.points.begin(); it != area.points.end(); it++) {
-		left = std::min(left, it->x);
-		right = std::max(right, it->x);
-		result->set(it->x, it->y, '-');
-	}
-	
+	tmp params = {_width, 0, result};
+	result->floodfill(area.point(), &area, 0, clear, &params);
 
 	//loop through all cols
-	for (int x = left; x < _width; x++) {
+	for (int x = params.left; x < params.right; x++) {
 		// if we find a cleared cell
 		char *src, *dst;
 		for (src = dst = &result->_data[x * _height]; src < &result->_data[(x + 1) * _height]; src++) {
@@ -208,6 +241,6 @@ board* board::click(area& area) const {
 	while (dst < &result->_data[_width * _height])
 		*dst++ = '.';
 
-	result->areas(*result->_areas);
+	result->update();
 	return result;
 }

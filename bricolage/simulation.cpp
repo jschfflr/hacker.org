@@ -1,3 +1,4 @@
+#include "common.h"
 #include "simulation.h"
 #include <iostream>
 #include <windows.h>
@@ -11,33 +12,54 @@
 
 #include "stack.h"
 
-simulation::simulation(const board& board):
-	heap(board.width() * board.height() * 10000){
+simulation::simulation(const board& board) {
 	samples = 0;
 	possibilities = 0;
 
-	heap.insert(new state(&board) );
+	initial = new state(board);
 }
 
 simulation::~simulation() {
-	//StatsManager::Get().RemoveVar("stack");
-	for (size_t i = 0; i < heap.size(); i++) {
-		delete heap[i];
-	}
+	delete initial;
 }
 
 void simulation::resolve(const state* state) {
-	heap_lock.lock();
-	if (running)
+	bool process = false;
+	lock.lock();
+	if (running) {
 		this->result = state;
+		process = true;
+	}
+	
 
 	running = false;
-	heap_lock.release();
+	lock.release();
+
+	if (process) {
+		stack<point> stack(1024);
+		const ::state* p = this->result;
+		while (p->parent()) {
+			stack.push(p->click());
+			p = p->parent();
+		}
+
+		point c;
+		std::stringstream result;
+		result << std::hex << std::setfill('0');
+		while ( stack.pop(&c) ) {
+			result << std::setw(2) << static_cast<unsigned>(c.x);
+			result << std::setw(2) << static_cast<unsigned>(c.y);
+		}
+		path = result.str();
+	}
 }
 
-void simulation::thread_wrapper(simulation* self) {
+void simulation::dfs_wrapper(simulation* self, state* initial) {
 	try {
-		self->thread();
+		timer t;
+		monitor::_emit(monitor::event("thread") << "started" << std::this_thread::get_id());
+		self->depth_first_search(initial);
+		monitor::_emit(monitor::event("thread") << "finished" << std::this_thread::get_id() << t.millis());
 	}
 	catch (std::exception e) {
 		monitor::_emit(monitor::event("exception") << "thread" << e.what());
@@ -45,57 +67,74 @@ void simulation::thread_wrapper(simulation* self) {
 	}
 }
 
-void simulation::dfs_wrapper(simulation* self, state* initial) {
-	self->depth_first_search(initial);
+void simulation::depth_first_search(state* initial) {
+	::stack<state*> stack(initial->board()->width() * initial->board()->height() << 12);
+	stack.push(initial);
+	state* s;
+	while (running && stack.top(&s)) {
+		samples++;
+		possibilities += s->board()->areas()->size();
+		if (s->board()->empty()) {
+			resolve(s);
+			break; // clean up the mess
+		}
+		
+		area* a;
+		if (s->board()->areas()->pop(&a)) {
+			if (a->size() < 3) {
+				delete a;
+				continue;
+			}
+				
+
+			state* p = new state(s, *a);
+			stack.push(p);
+			delete a;
+			continue;
+		}
+
+		stack.pop();
+		delete s;
+	}
+
+	while(stack.pop(&s))
+		delete s;
 }
 
-void simulation::dfs(std::string& path) {
+void simulation::dfs(std::string* path) {
 
-	area a;
+	area* a;
 	timer t;
-	state* s;
 	
-	heap.pop(&s);
 	running = true;
-	while (s->board()->areas()->pop(&a)) {
-		state *p = new state(s, a);
-		threads.push_back(std::thread(dfs_wrapper, this, p));
+	while (initial->board()->areas()->pop(&a)) {
+		if (a->size() < 3){
+			delete a;
+			continue;
+		}
+			
+
+		threads.push_back(std::thread(dfs_wrapper, this, new state(initial, *a)));
+		delete a;
 	}
 
 	for (auto it = threads.begin(); it != threads.end(); it++)
 		it->join();
 
+	
 	monitor::_emit(monitor::event("samples") << samples << t.get());
 	monitor::_emit(monitor::event("possibilities") << possibilities << t.get());
-
-	std::stringstream result;
-	const state* p = this->result;
-	result << std::hex << std::setfill('0');
-
-	while (p->parent()) {
-		result << std::setw(2) << static_cast<unsigned>(p->click().x);
-		result << std::setw(2) << static_cast<unsigned>(p->click().y);
-		p = p->parent();
-		path = result.str();
-	}
+	*path = this->path;
 }
 
-void simulation::depth_first_search(state* initial) {
-	::stack<state*> stack( initial->board()->width() * initial->board()->height() );
-	stack.push(initial);
-	state* s;
-	while( running && (s = stack.top()) ) {
-		if (s->board()->empty())
-			return resolve(s);
-
-		area a;
-		if( s->board()->areas()->pop(&a) ) {
-			state* p = new state(s, a);
-			stack.push(p);
-			continue;
-		}
-
-		stack.pop();
+#if 0
+void simulation::thread_wrapper(simulation* self) {
+	try {
+		self->thread();
+	}
+	catch (std::exception e) {
+		monitor::_emit(monitor::event("exception") << "thread" << e.what());
+		terminate();
 	}
 }
 
@@ -142,7 +181,7 @@ void simulation::thread() {
 	}
 }
 
-void simulation::run(std::string& path) {
+void simulation::run(std::string* path) {
 	running = true;
 	timer t;
 	for (unsigned int i = 0; i < 1 /* std::thread::hardware_concurrency() */; i++)
@@ -162,8 +201,8 @@ void simulation::run(std::string& path) {
 		result << std::setw(2) << static_cast<unsigned>(p->click().x);
 		result << std::setw(2) << static_cast<unsigned>(p->click().y);
 		p = p->parent();
-		path = result.str();
 	}
+	*path = result.str();
 }
 
 #if 0
@@ -219,4 +258,5 @@ std::list<Board> Simulation::run(Board& b, std::list<std::pair<int,int>> path) {
 	throw std::logic_error("Invalid State");
 #endif
 }
+#endif
 #endif

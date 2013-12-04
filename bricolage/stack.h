@@ -6,8 +6,8 @@
 template<class T>
 class stack {
 	T* _stack;
-	int _top;
-	int _size;
+	size_t _top;
+	size_t _size;
 
 public:
 	stack(size_t size) {
@@ -19,20 +19,32 @@ public:
 		delete[] _stack;
 	}
 	
-	void push(T& value) {
+	void push(const T& value) {
 		if (_top == _size - 1)
 			throw std::runtime_error("Stackoverflow");
-		_stack[++_top] = T(value);
+		_stack[++_top] = value;
 	}
 
-	T top() {
-		return T(_stack[_top]);
+	bool top(T* item) const {
+		if (_top == -1)
+			return false;
+
+		*item = _stack[_top];
+		return true;
 	}
 
 	void pop() {
 		if (_top == -1)
 			return;
 		_top--;
+	}
+
+	bool pop(T* element) {
+		if (_top == -1)
+			return false;
+
+		*element = _stack[_top--];
+		return true;
 	}
 
 	inline size_t size() const { return _top + 1; }
