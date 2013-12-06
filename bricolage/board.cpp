@@ -54,6 +54,8 @@ board::~board() {
 	this->_areas = 0;
 }
 
+#ifdef _DEBUG
+
 char board::get(int x, int y) const {
 	if( !(0 <= x && x < _width) ||
 		!(0 <= y && y < _height) )
@@ -86,6 +88,8 @@ void board::set(const point& p, char c) {
 	_data[p.y + p.x * _height] = c;
 }
 
+#endif
+
 std::string board::debug() const {
 	std::string output = "\"";
 	for(int y = _height - 1; y >= 0; y--) {
@@ -116,12 +120,11 @@ bool board::empty() const {
 	return true;
 }
 
-void board::floodfill(point point, area* area, char* data, void(*cb)(const ::point&, void*), void* param) {
+void board::floodfill(point point, area* area, char* data, void(*cb)(const ::point&, void*), void* param, stack<::point>* stack) {
 	char* tmp;
-	stack<::point> stack(_width * _height << 2);
+	::stack<::point>* _stack;
 	char color = get( point );
-	stack.push(point);
-
+	
 	if (!data) {
 		tmp = new char[_width * _height];
 		memcpy(tmp, _data, _width * _height);
@@ -129,8 +132,16 @@ void board::floodfill(point point, area* area, char* data, void(*cb)(const ::poi
 	else
 		tmp = data;
 
+	if (!stack) {
+		_stack = new ::stack<::point>(_width * _height);
+	}
+	else {
+		_stack = stack;
+	}
+
 	::point p;
-	while (stack.pop(&p)) {
+	_stack->push(point);
+	while (_stack->pop(&p)) {
 		if (!(0 <= p.x && p.x < _width) ||
 			!(0 <= p.y && p.y < _height))
 			continue; // Out of range
@@ -138,19 +149,22 @@ void board::floodfill(point point, area* area, char* data, void(*cb)(const ::poi
 		if (tmp[p.y + p.x * _height] != color)
 			continue;
 
-		tmp[p.y + p.x * _height] = 0;
+		tmp[p.y + p.x * _height] = 'X';
 		area->_size++;
 		if (cb)
 			cb(p, param);
 
-		stack.push(::point(p.x, p.y + 1));
-		stack.push(::point(p.x, p.y - 1));
-		stack.push(::point(p.x + 1, p.y));
-		stack.push(::point(p.x - 1, p.y));
+		_stack->push(::point(p.x, p.y + 1));
+		_stack->push(::point(p.x, p.y - 1));
+		_stack->push(::point(p.x + 1, p.y));
+		_stack->push(::point(p.x - 1, p.y));
 	}
 
 	if (!data)
 		delete[] tmp;
+
+	if (!stack)
+		delete _stack;
 }
 
 // Get all areas in the current field
@@ -171,7 +185,8 @@ void board::update() {
 			point p(x, y);
 			area* area = new ::area(color, p);
 			
-			floodfill(p, area, tmp);
+			floodfill(p, area, tmp, 0, 0, &stack);
+			stack.clear();
 
 			if (area->size())
 				_areas->insert(area);

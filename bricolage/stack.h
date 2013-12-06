@@ -19,6 +19,13 @@ public:
 	~stack() {
 		delete[] _stack;
 	}
+
+	void clear() {
+		//for (size_t i = 0; i < _size; i++)
+		//	delete _stack[i];
+
+		_top = -1;
+	}
 	
 	void push(const T& value) {
 		if (_top == _size - 1)

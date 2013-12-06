@@ -19,10 +19,9 @@ graph::~graph() {
 	stream.close();
 }
 
-void graph::emit(state* from, state* to) {
-	return;
+void graph::emit(const state* from, const point* by, const state* to) {
 	mutex.lock();
-	stream << "\t" << from->board()->debug() << " -> " << to->board()->debug() << std::endl;
+	stream << "\t" << from->board()->debug() << " -> " << to->board()->debug() << "[label=\"" << by->x << ":" << by->y << "\"]" << std::endl;
 	mutex.release();
 }
 
@@ -30,8 +29,8 @@ void graph::release() {
 	delete this;
 }
 
-void graph::_emit(state* from, state* to) {
-	instance->emit(from, to);
+void graph::_emit(const state* from, const point* by, const state* to) {
+	instance->emit(from, by, to);
 }
 
 graph* graph::create(std::string filename) {

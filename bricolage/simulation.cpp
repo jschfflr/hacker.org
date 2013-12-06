@@ -83,10 +83,9 @@ void simulation::depth_first_search(state* initial) {
 				delete a;
 				continue;
 			}
-				
 
 			state* p = new state(s, *a);
-			graph::_emit(s, p);
+			GRAPH(s, &a->point(), p);
 			stack.push(p);
 			delete a;
 			continue;
@@ -113,7 +112,7 @@ void simulation::dfs(std::string* path) {
 		}
 			
 		state* s = new state(initial, *a);
-		graph::_emit(initial, s);
+		GRAPH(initial, &a->point(), s);
 		threads.push_back(std::thread(dfs_wrapper, this, s));
 		delete a;
 	}

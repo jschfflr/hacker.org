@@ -20,7 +20,7 @@ public:
 	void click(point click);
 
 	inline bool operator <(const state& other) const {
-		return _board->areas()->size() < other._board->areas()->size();
+		return _board->areas()->size() > other._board->areas()->size();
 	}
 
 	inline const state* parent() const { return _parent; }

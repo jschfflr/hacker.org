@@ -15,14 +15,20 @@ public:
 	graph(std::string filename);
 	~graph();
 
-	void emit(state* from, state* to);
+	void emit(const state* from, const point* by, const state* to);
 	void release();
 
-	static void _emit(state* from, state* to);
+	static void _emit(const state* from, const point* by, const state* to);
 	static graph* create(std::string filename);
 
 private:
 	static graph* instance;
 };
+
+#ifdef _DEBUG
+	#define GRAPH(from, by, to) graph::_emit(from,by,to);
+#else
+	#define GRAPH
+#endif
 
 #endif
